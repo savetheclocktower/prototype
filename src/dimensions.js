@@ -20,6 +20,8 @@ Element.Dimensions = Class.create({
   
   // converts a raw CSS value like '9px' or '1em' to
   // a number (in pixels)
+  
+  // IE: Redefined below
   cssToNumber: function() {
     
   },
@@ -29,7 +31,7 @@ Element.Dimensions = Class.create({
   },
   
   toHash: function() {
-    return this.dimensions();
+    return this.dimensions;
   },
   
   toJSON: function() {
@@ -37,6 +39,13 @@ Element.Dimensions = Class.create({
   }
 });
 
+if (Prototype.Browser.IE) {
+  Element.Dimensions.addMethods({
+    cssToNumber: function() {
+      // IE-specific hack to ensure a pixel value
+    }
+  });
+}
 
 Element.Methods.getDimensions = function(element, options) {
   return new Element.Dimensions(element, options);
