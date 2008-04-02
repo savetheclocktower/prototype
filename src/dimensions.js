@@ -162,9 +162,151 @@ if (Prototype.Browser.IE) {
   });
 }
 
-Element.Methods.getDimensions = function(element, options) {
-  return new Element.Dimensions(element, options).toObject();
+// Acts like an array for backwards-compatibility.
+Element.Dimensions.normalize = function(obj) {
+  obj[0] = obj.left || obj.width;
+  obj[1] = obj.top  || obj.height;
+  return obj;
 };
+
+Object.extend(Element.Methods, {
+  getDimensions: function(element, options) {
+    return new Element.Dimensions(element, options).toObject();
+  },
+    
+  viewportOffset: function(forElement) {
+    forElement = $(forElement);
+
+    // IE and FF >= 3 provide getBoundingClientRect, a much quicker path
+    // to retrieving viewport offset.   
+    if (element.getBoundingClientRect) {
+      var d = element.getBoundingClientRect();
+      return Element.Dimensions.normalize({ left: d.left, top: d.top });
+    }
+    
+    var valueT = 0, valueL = 0, element = forElement;
+
+    // First collect cumulative offsets
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+
+      // Safari fix
+      if (element.offsetParent == document.body &&
+        Element.getStyle(element, 'position') === 'absolute') break;
+
+    } while (element = element.offsetParent);
+
+    
+    // Then subtract cumulative scroll offsets
+    element = forElement;
+    do {
+      if (!Prototype.Browser.Opera || element.tagName.toUpperCase() == 'BODY') {
+        valueT -= element.scrollTop  || 0;
+        valueL -= element.scrollLeft || 0;
+      }
+    } while (element = element.parentNode);
+
+    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+  },
+  
+  cumulativeOffset: function(element) {
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+      element = element.offsetParent;
+    } while (element);
+    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+  },
+  
+  cumulativeScrollOffset: function(element) {
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.scrollTop  || 0;
+      valueL += element.scrollLeft || 0; 
+      element = element.parentNode;
+    } while (element);
+    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+  },
+  
+  positionedOffset: function(element) {
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+      element = element.offsetParent;
+      if (element) {
+        if (element.tagName.toUpperCase() == 'BODY') break;
+        if (Element.getStyle(element, 'position') !== 'static') break;
+      }
+    } while (element);
+    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+  },
+  
+  absolutize: function(element) {
+    element = $(element);
+    if (element.getStyle('position') === 'absolute') return element;
+
+    var offsets = element.positionedOffset();
+    var top     = offsets[1];
+    var left    = offsets[0];
+    var width   = element.clientWidth;
+    var height  = element.clientHeight;
+    
+    Object.extend(element, {
+      _originalLeft:   left - parseFloat(element.style.left || 0),
+      _originalTop:    top  - parseFloat(element.style.top  || 0),
+      _originalWidth:  element.style.width,
+      _originalHeight: element.style.height      
+    });
+    
+    element.setStyle({
+      position: 'absolute',
+      top:      top + 'px',
+      left:     left + 'px',
+      width:    width + 'px',
+      height:   height + 'px'
+    });
+
+    return element;
+  },
+ 
+  relativize: function(element) {
+    element = $(element);
+    if (element.getStyle('position') === 'relative') return element;
+    
+    if (Object.isUndefined(element._originalTop)) {
+      throw "Element#absolutize must be called first.";
+    }
+   
+    element.setStyle({ position: 'relative' });
+        
+    var top  = parseFloat(element.style.top  || 0) - (element._originalTop || 0);
+    var left = parseFloat(element.style.left || 0) - (element._originalLeft || 0);
+    
+    element.setStyle({
+      top:      top + 'px',
+      left:     left + 'px',
+      width:    element._originalHeight + 'px',
+      height:   element._originalWidth  + 'px'
+    });
+    
+    return element;
+  },
+  
+  getOffsetParent: function(element) {
+    if (element.offsetParent) return $(element.offsetParent);
+    if (element == document.body) return $(element);
+    
+    while ((element = element.parentNode) && element !== document.body)
+      if (Element.getStyle(element, 'position') !== 'static')
+        return element;
+
+    return $(document.body);
+  }
+});
+
 
 document.viewport = {
   getDimensions: function() {
