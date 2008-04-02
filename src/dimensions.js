@@ -10,11 +10,14 @@ Element.Dimensions = Class.create({
   },
   
   getDimensions: function() {
-    var element = this.element, display = element.getStyle('display');
+    var element = this.element, 
+        display = element.getStyle('display'),
+        noOffsetWidth;
     
     // The style object is inaccessible in Safari <= 2.0 when the element
     // is hidden.
     var isNotShown = display === "none" || display === null;
+    var isTable = element.tagName.toUpperCase() == 'TABLE';
     
     // If the element is hidden, we show it for an instant
     // to grab its dimensions.
@@ -33,8 +36,20 @@ Element.Dimensions = Class.create({
       });
     }
     
+    // clientWidth includes margin offsets of a table in Mozilla,
+    // set offsets to 0, get width value, then revert back
+    if (isTable) {
+      var originalLeft = element.style.marginLeft;
+      var originalRight = element.style.marginRight;
+      element.style.marginLeft = '0px';
+      element.style.marginRight = '0px';
+      noOffsetWidth = element.clientWidth;
+      element.style.marginLeft = originalLeft;
+      element.style.marginRight = originalRight;
+    }
+    
     var paddingBox = {
-      width:  element.clientWidth,
+      width:  noOffsetWidth || element.clientWidth,
       height: element.clientHeight
     };
     
@@ -62,7 +77,7 @@ Element.Dimensions = Class.create({
       height: paddingBox.height + border.top  + border.bottom
     };
     
-    this.dimensions.set('borderBox', border);    
+    this.dimensions.set('borderBox', border);
     
     // If we altered the element's styles, return them to their
     // original values.
