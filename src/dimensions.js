@@ -179,9 +179,18 @@ Object.extend(Element.Methods, {
 
     // IE and FF >= 3 provide getBoundingClientRect, a much quicker path
     // to retrieving viewport offset.   
-    if (element.getBoundingClientRect) {
-      var d = element.getBoundingClientRect();
-      return Element.Dimensions.normalize({ left: d.left, top: d.top });
+    if (forElement.getBoundingClientRect) {
+      var d = forElement.getBoundingClientRect(), 
+          doc = document.documentElement, 
+          body = document.body;
+      var offset = {
+        left: Math.max(doc.scrollLeft, body.scrollLeft) - (doc.clientLeft || 0),
+        top: Math.max(doc.scrollTop, body.scrollTop) - (doc.clientTop || 0)
+      }
+      return Element.Dimensions.normalize({ 
+        left: d.left + offset.left, 
+        top: d.top + offset.top 
+      });
     }
     
     var valueT = 0, valueL = 0, element = forElement;
@@ -329,8 +338,13 @@ document.viewport = {
   },
   
   getScrollOffsets: function() {
-    return Element._returnOffset(
-      window.pageXOffset || document.documentElement.scrollLeft || document.body.scrollLeft,
-      window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop);
+    return Element.Dimensions.normalize({
+      left: window.pageXOffset 
+        || document.documentElement.scrollLeft 
+        || document.body.scrollLeft,
+      top: window.pageYOffset 
+        || document.documentElement.scrollTop 
+        || document.body.scrollTop
+    });
   }
 };
