@@ -164,9 +164,10 @@ if (Prototype.Browser.IE) {
 
 // Acts like an array for backwards-compatibility.
 Element.Dimensions.normalize = function(obj) {
-  obj[0] = obj.left || obj.width;
-  obj[1] = obj.top  || obj.height;
-  return obj;
+  var arr = [];
+  arr[0] = ('left' in obj) ? obj.left : obj.width;
+  arr[1] = ('top'  in obj) ? obj.top  : obj.height;
+  return Object.extend(arr, obj);
 };
 
 Object.extend(Element.Methods, {
@@ -183,14 +184,6 @@ Object.extend(Element.Methods, {
       var d = forElement.getBoundingClientRect(), 
           doc = document.documentElement, 
           body = document.body;
-      var offset = {
-        left: Math.max(doc.scrollLeft, body.scrollLeft) - (doc.clientLeft || 0),
-        top: Math.max(doc.scrollTop, body.scrollTop) - (doc.clientTop || 0)
-      }
-      return Element.Dimensions.normalize({ 
-        left: d.left + offset.left, 
-        top: d.top + offset.top 
-      });
     }
     
     var valueT = 0, valueL = 0, element = forElement;
