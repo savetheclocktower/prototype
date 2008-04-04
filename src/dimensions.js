@@ -181,9 +181,9 @@ Object.extend(Element.Methods, {
     // IE and FF >= 3 provide getBoundingClientRect, a much quicker path
     // to retrieving viewport offset.   
     if (forElement.getBoundingClientRect) {
-      var d = forElement.getBoundingClientRect(), 
-          doc = document.documentElement, 
-          body = document.body;
+      var d = forElement.getBoundingClientRect();
+      return Element.Dimensions.normalize({
+       left: Math.round(d.left), top: Math.round(d.top) });
     }
     
     var valueT = 0, valueL = 0, element = forElement;
