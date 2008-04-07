@@ -1,5 +1,4 @@
 Element.Dimensions = Class.create({
-  // TODO: Add method for getting offsets (cumulative, viewport, scroll)
   initialize: function(element, options) {
     this.element = $(element);
     this.options = options;
@@ -77,7 +76,7 @@ Element.Dimensions = Class.create({
       height: paddingBox.height + border.top  + border.bottom
     };
     
-    this.dimensions.set('borderBox', border);
+    this.dimensions.set('borderBox', borderBox);
     
     // If we altered the element's styles, return them to their
     // original values.

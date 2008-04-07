@@ -12,6 +12,15 @@
   <link rel="stylesheet" href="../test.css" type="text/css" />
   <style type="text/css" media="screen">
   /* <![CDATA[ */
+    #dimensions_test_1 {
+      width: 200px;
+      height: 200px;
+      padding: 5px 10px;
+      margin: 12px;
+      border: 4px solid #039;
+    }
+    
+  
     #style_test_1 { cursor: pointer; font-size:12px;}
     div.style-test { margin-left: 1px }
     
@@ -111,6 +120,9 @@
 </div>
 
 <div id="testlog"> </div>
+
+
+<div id="dimensions_test_1">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</div>
 
 <div id="test-visible">visible</div>
 <div id="test-hidden" style="display:none;">hidden</div>
@@ -640,7 +652,29 @@
       
         window.resizeTo(850, 650);
       }.bind(this));
+    },
+    
+    
+    testDimensions: function() {
+      var d = $('dimensions_test_1').getDimensions();
+
+      this.assertEqual(200, d.contentBox.width, 'content box width');
+      this.assertEqual(220, d.paddingBox.width, 'padding box width');
+      this.assertEqual(228, d.borderBox.width,  'border box width');
+      
+      this.assertEqual(d.contentBox.height,
+       d.paddingBox.height - d.padding.top - d.padding.bottom,
+       "content box height, padding box height");
+      
+      this.assertEqual(4,  d.border.left,  'border left');
+      this.assertEqual(10, d.padding.left, 'padding left');
+      this.assertEqual(5,  d.padding.top,  'padding top');
+      
+      // TODO: Relative measurements
+      
     }
+    
+    // TODO: Offset tests
   });
 
   function preservingBrowserDimensions(callback) {
