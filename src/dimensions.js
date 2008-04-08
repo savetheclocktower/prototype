@@ -1,11 +1,13 @@
-/** section: dimensions
+/** 
  *  class Element.Dimensions
- *  new Element.Dimensions(element[, options])
- *  Returns a versatile measurement object that quacks several ways. Can be
- *  coerced into a hash, an object, or JSON. Used by the Element instance
- *  methods that measure dimensions and offsets.
 **/
 Element.Dimensions = Class.create({
+  /**
+   *  new Element.Dimensions(element[, options])
+   *  Returns a versatile measurement object that quacks several ways. Can be
+   *  coerced into a hash, an object, or JSON. Used by the Element instance
+   *  methods that measure dimensions and offsets.
+   **/
   initialize: function(element, options) {
     this.element = $(element);
     this.options = Object.extend({
@@ -202,7 +204,7 @@ Element.Dimensions.normalize = function(obj) {
 };
 
 Object.extend(Element.Methods, {
-  /** section: dimensions
+  /** 
    *  Element#getDimensions(@element[, options]) -> Object
    *  Reports the dimensions and offsets of the given element.
    *
@@ -211,13 +213,13 @@ Object.extend(Element.Methods, {
    *  boxes; and viewport, cumulative, scroll, and positioned offsets.
    *  The `options` argument can be used to bypass checks you don't need
    *  when speed is of the utmost importance.
-   *
-  **/
+  **/  
   getDimensions: function(element, options) {
     return new Element.Dimensions(element, options).toObject();
-  },
+  },  
   
-  /** section: dimensions
+  
+  /** 
    *  Element#viewportOffset(@element) -> Object
    *  Reports the element's top- and left-distance from the upper-left
    *  corner of the viewport.
@@ -259,7 +261,7 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
-  /** section: dimensions
+  /** 
    *  Element#cumulativeOffset(@element) -> Object
    *  Reports the element's top- and left-distance from the upper-left
    *  corner of its containing document.
@@ -274,7 +276,7 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
-  /** section: dimensions
+  /** 
    *  Element#cumulativeScrollOffset(@element) -> Object
    *  Reports the element's top- and left-distance from the upper-left
    *  corner of its containing document, compensating for the scroll
@@ -290,7 +292,7 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
-  /** section: dimensions
+  /** 
    *  Element#cumulativeOffset(@element) -> Object
    *  Reports the element's top- and left-distance from its positioning
    *  parent.
@@ -309,7 +311,7 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
-  /** section: dimensions
+  /** 
    *  Element#absolutize(@element) -> Element
    *  Switches element from static/relative positioning to absolute
    *  positioning while maintaining the element's size and position.
@@ -342,7 +344,7 @@ Object.extend(Element.Methods, {
     return element;
   },
   
-  /** section: dimensions
+  /** 
    *  Element#relativize(@element) -> Element
    *  Reverts element from absolute positioning to relative positioning
    *  while maintaining the element's size and position.
@@ -370,7 +372,7 @@ Object.extend(Element.Methods, {
     return element;
   },
   
-  /** section: dimensions
+  /** 
    *  Element#getOffsetParent(@element) -> Element
    *  Returns the element's positioning context — the nearest ancestor
    *  with a CSS "position" value other than "static."
@@ -389,7 +391,7 @@ Object.extend(Element.Methods, {
 
 
 document.viewport = {
-  /** section: dimensions
+  /** 
    *  document.viewport.getDimensions() -> Object
    *  Returns the height and width of the browser viewport.
   **/  
@@ -404,7 +406,7 @@ document.viewport = {
     return dimensions;
   },
   
-  /** section: dimensions
+  /** 
    *  document.viewport.getWidth() -> Number
    *  Returns the width of the browser viewport.
   **/
@@ -412,7 +414,7 @@ document.viewport = {
     return this.getDimensions().width;
   },
 
-  /** section: dimensions
+  /** 
    *  document.viewport.getHeight() -> Number
    *  Returns the height of the browser viewport.
   **/
@@ -420,7 +422,7 @@ document.viewport = {
     return this.getDimensions().height;
   },
 
-  /** section: dimensions
+  /** 
    *  document.viewport.getScrollOffsets() -> Object
    *  Returns the distances the viewport has been scrolled in the
    *  horizontal and vertical directions.
