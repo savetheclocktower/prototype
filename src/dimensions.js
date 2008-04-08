@@ -1,7 +1,17 @@
+/** section: dimensions
+ *  class Element.Dimensions
+ *  new Element.Dimensions(element[, options])
+ *  Returns a versatile measurement object that quacks several ways. Can be
+ *  coerced into a hash, an object, or JSON. Used by the Element instance
+ *  methods that measure dimensions and offsets.
+**/
 Element.Dimensions = Class.create({
   initialize: function(element, options) {
     this.element = $(element);
-    this.options = options;
+    this.options = Object.extend({
+      dimensions: true,
+      offsets:    false  
+    }, options || {});
     
     this.dimensions = new Hash();
     
@@ -35,48 +45,70 @@ Element.Dimensions = Class.create({
       });
     }
     
-    // clientWidth includes margin offsets of a table in Mozilla,
-    // set offsets to 0, get width value, then revert back
-    if (isTable) {
-      var originalLeft = element.style.marginLeft;
-      var originalRight = element.style.marginRight;
-      element.style.marginLeft = '0px';
-      element.style.marginRight = '0px';
-      noOffsetWidth = element.clientWidth;
-      element.style.marginLeft = originalLeft;
-      element.style.marginRight = originalRight;
-    }
-    
-    var paddingBox = {
-      width:  noOffsetWidth || element.clientWidth,
-      height: element.clientHeight
-    };
-    
-    // For backwards-compatibility, the returned object will have
-    // width and height equal to the padding-box values.
-    this.dimensions.update(paddingBox);
+    if (this.options.dimensions === true) {
+      // clientWidth includes margin offsets of a table in Mozilla,
+      // set offsets to 0, get width value, then revert back
+      if (isTable) {
+        var originalLeft = element.style.marginLeft;
+        var originalRight = element.style.marginRight;
+        element.style.marginLeft = '0px';
+        element.style.marginRight = '0px';
+        noOffsetWidth = element.clientWidth;
+        element.style.marginLeft = originalLeft;
+        element.style.marginRight = originalRight;
+      }
 
-    this.dimensions.set('paddingBox', paddingBox);
+      var paddingBox = {
+        width:  noOffsetWidth || element.clientWidth,
+        height: element.clientHeight
+      };
+
+      // For backwards-compatibility, the returned object will have
+      // width and height equal to the padding-box values.
+      this.dimensions.update(paddingBox);
+
+      this.dimensions.set('paddingBox', paddingBox);
+
+      var padding = this.getStyleValuesFor('padding', 'trbl');
+      this.dimensions.set('padding', padding);
+
+      var contentBox = {
+        width:  paddingBox.width  - padding.left - padding.right,
+        height: paddingBox.height - padding.top  - padding.bottom
+      };
+
+      this.dimensions.set('contentBox', contentBox);
+
+      var border = this.getStyleValuesFor('border', 'trbl');
+      this.dimensions.set('border', border);
+
+      var borderBox = {
+        width:  paddingBox.width  + border.left + border.right,
+        height: paddingBox.height + border.top  + border.bottom
+      };
+
+      this.dimensions.set('borderBox', borderBox);
+      
+    } // dimensions
     
-    var padding = this.getStyleValuesFor('padding', 'trbl');
-    this.dimensions.set('padding', padding);
     
-    var contentBox = {
-      width:  paddingBox.width  - padding.left - padding.right,
-      height: paddingBox.height - padding.top  - padding.bottom
-    };
-    
-    this.dimensions.set('contentBox', contentBox);
-    
-    var border = this.getStyleValuesFor('border', 'trbl');
-    this.dimensions.set('border', border);
-    
-    var borderBox = {
-      width:  paddingBox.width  + border.left + border.right,
-      height: paddingBox.height + border.top  + border.bottom
-    };
-    
-    this.dimensions.set('borderBox', borderBox);
+    if (this.options.offsets === true) {
+      var offsets = {};
+      
+      var v = element.viewportOffset();
+      offsets.viewport = { top: v.top, left: v.left };
+      
+      var p = element.positionedOffset();
+      offsets.positioned = { top: p.top, left: p.left };
+      
+      var s = element.cumulativeScrollOffset();
+      offsets.scroll = { top: s.top, left: s.left };
+      
+      var c = element.cumulativeOffset();
+      offsets.cumulative = { top: c.top, left: c.left };
+      
+      this.dimensions.update('offsets', offsets);
+    } // offsets  
     
     // If we altered the element's styles, return them to their
     // original values.
@@ -170,10 +202,26 @@ Element.Dimensions.normalize = function(obj) {
 };
 
 Object.extend(Element.Methods, {
+  /** section: dimensions
+   *  Element#getDimensions(@element[, options]) -> Object
+   *  Reports the dimensions and offsets of the given element.
+   *
+   *  By default, `getDimensions` will return as much information about the
+   *  element as possible: dimensions for the content, padding, and border
+   *  boxes; and viewport, cumulative, scroll, and positioned offsets.
+   *  The `options` argument can be used to bypass checks you don't need
+   *  when speed is of the utmost importance.
+   *
+  **/
   getDimensions: function(element, options) {
     return new Element.Dimensions(element, options).toObject();
   },
-    
+  
+  /** section: dimensions
+   *  Element#viewportOffset(@element) -> Object
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of the viewport.
+  **/    
   viewportOffset: function(forElement) {
     forElement = $(forElement);
 
@@ -211,6 +259,11 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
+  /** section: dimensions
+   *  Element#cumulativeOffset(@element) -> Object
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of its containing document.
+  **/  
   cumulativeOffset: function(element) {
     var valueT = 0, valueL = 0;
     do {
@@ -221,6 +274,12 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
+  /** section: dimensions
+   *  Element#cumulativeScrollOffset(@element) -> Object
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of its containing document, compensating for the scroll
+   *  offsets of any ancestors.
+  **/  
   cumulativeScrollOffset: function(element) {
     var valueT = 0, valueL = 0;
     do {
@@ -231,6 +290,11 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
+  /** section: dimensions
+   *  Element#cumulativeOffset(@element) -> Object
+   *  Reports the element's top- and left-distance from its positioning
+   *  parent.
+  **/  
   positionedOffset: function(element) {
     var valueT = 0, valueL = 0;
     do {
@@ -245,6 +309,11 @@ Object.extend(Element.Methods, {
     return Element.Dimensions.normalize({ left: valueL, top: valueT });
   },
   
+  /** section: dimensions
+   *  Element#absolutize(@element) -> Element
+   *  Switches element from static/relative positioning to absolute
+   *  positioning while maintaining the element's size and position.
+  **/  
   absolutize: function(element) {
     element = $(element);
     if (element.getStyle('position') === 'absolute') return element;
@@ -272,7 +341,12 @@ Object.extend(Element.Methods, {
 
     return element;
   },
- 
+  
+  /** section: dimensions
+   *  Element#relativize(@element) -> Element
+   *  Reverts element from absolute positioning to relative positioning
+   *  while maintaining the element's size and position.
+  **/ 
   relativize: function(element) {
     element = $(element);
     if (element.getStyle('position') === 'relative') return element;
@@ -296,6 +370,11 @@ Object.extend(Element.Methods, {
     return element;
   },
   
+  /** section: dimensions
+   *  Element#getOffsetParent(@element) -> Element
+   *  Returns the element's positioning context — the nearest ancestor
+   *  with a CSS "position" value other than "static."
+  **/  
   getOffsetParent: function(element) {
     if (element.offsetParent) return $(element.offsetParent);
     if (element == document.body) return $(element);
@@ -310,6 +389,10 @@ Object.extend(Element.Methods, {
 
 
 document.viewport = {
+  /** section: dimensions
+   *  document.viewport.getDimensions() -> Object
+   *  Returns the height and width of the browser viewport.
+  **/  
   getDimensions: function() {
     var dimensions = { };
     var B = Prototype.Browser;
@@ -320,15 +403,28 @@ document.viewport = {
     });
     return dimensions;
   },
-
+  
+  /** section: dimensions
+   *  document.viewport.getWidth() -> Number
+   *  Returns the width of the browser viewport.
+  **/
   getWidth: function() {
     return this.getDimensions().width;
   },
 
+  /** section: dimensions
+   *  document.viewport.getHeight() -> Number
+   *  Returns the height of the browser viewport.
+  **/
   getHeight: function() {
     return this.getDimensions().height;
   },
-  
+
+  /** section: dimensions
+   *  document.viewport.getScrollOffsets() -> Object
+   *  Returns the distances the viewport has been scrolled in the
+   *  horizontal and vertical directions.
+  **/  
   getScrollOffsets: function() {
     return Element.Dimensions.normalize({
       left: window.pageXOffset 
