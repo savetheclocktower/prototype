@@ -1,3 +1,12 @@
+/** section: ajax
+**/
+
+
+/**
+ *  Ajax.getTransport() -> XMLHttpRequest
+ *  Returns a new instance of XMLHttpRequest (or its ActiveXObject
+ *  equivalent in the case of Internet Explorer). 
+**/
 var Ajax = {
   getTransport: function() {
     return Try.these(
@@ -10,17 +19,44 @@ var Ajax = {
   activeRequestCount: 0
 };
 
+
 Ajax.Responders = {
+  /**
+   *  Ajax.Responders.responders = Array
+  **/
   responders: [],
   
   _each: function(iterator) {
     this.responders._each(iterator);
   },
+  
+  /**
+   *  Ajax.Responders.register(responders) -> undefined
+   *  Attaches global responders for the life cycle of every Ajax request.
+   *  
+   *  Expects an Object with any number of key/value pairs. The key can be any
+   *  one of `onCreate`, `onUninitialized`, `onLoading`,`onLoaded`,
+   *  `onInteractive`, `onComplete`, `onSuccess`, `onFailure`, or `onXXX`, 
+   *  where XXX is any HTTP status code. The value is a function that will
+   *  receive three arguments (in order): the [[Ajax.Response]] object; the raw
+   *  XMLHttpRequest object; and the evaluated JSON, if any, that was delivered
+   *  in the response.
+   *  
+   *  To remove responders, use [[Ajax.Responders.unregister]].
+  **/
 
   register: function(responder) {
     if (!this.include(responder))
       this.responders.push(responder);
   },
+  
+  /**
+   *  Ajax.Responders.unregister(responders) -> undefined
+   *  Detaches global responders for the life cycle of every Ajax request.
+   *  
+   *  Must be a reference to an earlier object passed to
+   *  [[Ajax.Responders.register]].
+  **/
   
   unregister: function(responder) {
     this.responders = this.responders.without(responder);
@@ -44,6 +80,10 @@ Ajax.Responders.register({
   onComplete: function() { Ajax.activeRequestCount-- }
 });
 
+/**
+ *  class Ajax.Base
+**/
+
 Ajax.Base = Class.create({
   initialize: function(options) {
     this.options = {
@@ -66,9 +106,25 @@ Ajax.Base = Class.create({
   }
 });
 
+/**
+ *  class Ajax.Request < Ajax.Base
+**/
+
 Ajax.Request = Class.create(Ajax.Base, {
   _complete: false,
   
+  /**
+   *  new Ajax.Request(url[, options])
+   *  Creates and dispatches an XmlHttpRequest to the given URL.
+   *  This object is a general-purpose AJAX requester: it handles the
+   *  life-cycle of the request, handles the boilerplate, and lets you plug in
+   *  callback functions for your custom needs.
+   *  
+   *  In the optional `options` hash, you usually provide an `onComplete` and/or
+   *  onSuccess callback, unless you're in the edge case where you're getting a
+   *  JavaScript-typed response, that will automatically be eval'd.
+   *  
+  **/  
   initialize: function($super, url, options) {
     $super(options);
     this.transport = Ajax.getTransport();
@@ -236,9 +292,16 @@ Ajax.Request = Class.create(Ajax.Base, {
   }
 });
 
+/**
+ *  Ajax.Request.Events = Array
+**/
 Ajax.Request.Events = 
   ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
-
+  
+  
+/**
+ *  class Ajax.Response
+**/
 Ajax.Response = Class.create({
   initialize: function(request){
     this.request = request;
@@ -313,7 +376,16 @@ Ajax.Response = Class.create({
   }
 });
 
+/**
+ *  class Ajax.Updater < Ajax.Request
+**/
+
 Ajax.Updater = Class.create(Ajax.Request, {
+  /**
+   *  new Ajax.Updater(container, url, options)
+   *  Creates and dispatches an XmlHttpRequest, then fills the given element
+   *  with the text of the response.
+  **/
   initialize: function($super, container, url, options) {
     this.container = {
       success: (container.success || container),
@@ -349,7 +421,19 @@ Ajax.Updater = Class.create(Ajax.Request, {
   }
 });
 
+/**
+ *  class Ajax.PeriodicalUpdater < Ajax.Base
+**/
+
 Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
+  /**
+   *  new Ajax.PeriodicalUpdater(container, url, options)
+   *  Periodically performs an Ajax request and updates a container’s contents
+   *  based on the response text.
+   *  
+   *  Offers a mechanism for “decay” (`options.decay`) which lets it trigger at
+   *  widening intervals while the response is unchanged.
+  **/
   initialize: function($super, container, url, options) {
     $super(options);
     this.onComplete = this.options.onComplete;
@@ -363,11 +447,21 @@ Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
 
     this.start();
   },
+  
+  /**
+   *  Ajax.PeriodicalUpdater#start() -> undefined
+   *  Triggers a `PeriodicalUpdater`'s Ajax request.
+  **/
 
   start: function() {
     this.options.onComplete = this.updateComplete.bind(this);
     this.onTimerEvent();
   },
+  
+  /**
+   *  Ajax.PeriodicalUpdater#stop -> undefined
+   *  Pauses a `PeriodicalUpdater`.
+  **/
 
   stop: function() {
     this.updater.options.onComplete = undefined;

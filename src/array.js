@@ -1,3 +1,12 @@
+/** alias: Array.from
+ *  $A(iterable) -> Array
+ *  Accepts an array-like collection (anything with numeric indices) and
+ *  returns its equivalent as an actual `Array` object.
+ *  
+ *  This method is a convenience alias of [[Array.from]], but is the preferred
+ *  way of casting to an `Array`.
+**/
+
 function $A(iterable) {
   if (!iterable) return [];
   if (iterable.toArray) return iterable.toArray();
@@ -19,6 +28,11 @@ if (Prototype.Browser.WebKit) {
 
 Array.from = $A;
 
+/**
+ *  class Array
+ *  includes Enumerable
+**/
+
 Object.extend(Array.prototype, Enumerable);
 
 if (!Array.prototype._reverse) Array.prototype._reverse = Array.prototype.reverse;
@@ -29,25 +43,50 @@ Object.extend(Array.prototype, {
       iterator(this[i]);
   },
   
+  /**
+   *  Array#clear() -> Array
+   *  Empties an array.
+  **/
   clear: function() {
     this.length = 0;
     return this;
   },
   
+  /**
+   *  Array#first() -> ?
+   *  Returns the array's first item.
+  **/  
   first: function() {
     return this[0];
   },
   
+  /**
+   *  Array#last() -> ?
+   *  Returns the array's last item.
+  **/  
   last: function() {
     return this[this.length - 1];
   },
   
+  
+  /**
+   *  Array#compact() -> Array
+   *  Trims the array of `null`, `undefined`, or other "falsy" values.
+  **/
   compact: function() {
     return this.select(function(value) {
       return value != null;
     });
   },
   
+  /**
+   *  Array#flatten() -> Array
+   *  Returns a “flat” (one-dimensional) version of the array.
+   *  
+   *  Nested arrays are recursively injected “inline.” This can prove very
+   *  useful when handling the results of a recursive collection algorithm,
+   *  for instance.
+  **/
   flatten: function() {
     return this.inject([], function(array, value) {
       return array.concat(Object.isArray(value) ?
@@ -55,21 +94,46 @@ Object.extend(Array.prototype, {
     });
   },
   
+  /**
+   *  Array#without(value...) -> Array
+   *  Produces a new version of the array that does not contain any of the
+   *  specified values.
+  **/
   without: function() {
     var values = $A(arguments);
     return this.select(function(value) {
       return !values.include(value);
     });
   },
-  
+
+  /**
+   *  Array#reverse(inline = false) -> Array
+   *  Returns the reversed version of the array. By default, directly reverses
+   *  the original. If `inline` is set to `false`, uses a clone of the original
+   *  array.   
+  **/
   reverse: function(inline) {
     return (inline !== false ? this : this.toArray())._reverse();
   },
   
+  /**
+   * Array#reduce() -> Array
+   *  Reduces arrays: one-element arrays are turned into their unique item,
+   *  while multiple-element arrays are returned untouched.
+  **/  
   reduce: function() {
     return this.length > 1 ? this : this[0];
   },
   
+  /**
+   *  Array#uniq(sorted = false)
+   *  Produces a duplicate-free version of an array. If no duplicates are
+   *  found, the original array is returned.
+   *  
+   *  The optional `sorted` argument tells the method whether the array has
+   *  has already been sorted. If so, the method will use a less-costly
+   *  algorithm.
+  **/  
   uniq: function(sorted) {
     return this.inject([], function(array, value, index) {
       if (0 == index || (sorted ? array.last() != value : !array.include(value)))
@@ -78,24 +142,49 @@ Object.extend(Array.prototype, {
     });
   },
   
+  /**
+   *  Array#intersect(array) -> Array
+   *  Returns an array containing every item that is shared between the two
+   *  given arrays.
+  **/
   intersect: function(array) { 
     return this.uniq().findAll(function(item) { 
       return array.detect(function(value) { return item === value });
     }); 
   },
   
+  /** alias of: Array#toArray
+   *  Array#clone() -> Array
+   *  Returns a duplicate of the array, leaving the original array intact.
+  **/
   clone: function() {
     return [].concat(this);
   },
   
+  /** related to: Enumerable#size
+   *  Array#size() -> Number
+   *  Returns the size of the array.
+   *  
+   *  This is just a local optimization of the mixed-in [[Enumerable#size]]
+   *  which avoids array cloning and uses the array’s native length property.
+  **/  
   size: function() {
     return this.length;
   },
   
+  
+  /** related to: Object.inspect
+   *  Array#inspect() -> String
+   *  Returns the debug-oriented string representation of an array.
+  **/
   inspect: function() {
     return '[' + this.map(Object.inspect).join(', ') + ']';
   },
   
+  /** related to: Object.toJSON
+   *  Array#toJSON() -> String
+   *  Returns a JSON string representation of the array.
+  **/ 
   toJSON: function() {
     var results = [];
     this.each(function(object) {
@@ -109,6 +198,17 @@ Object.extend(Array.prototype, {
 // use native browser JS 1.6 implementation if available
 if (Object.isFunction(Array.prototype.forEach))
   Array.prototype._each = Array.prototype.forEach;
+  
+  
+/**
+ *  Array#indexOf(item[, offset]) -> Number
+ *  Returns the position of the first occurrence of `item` within the array.
+ *  
+ *  The optional `offset` argument is a number. If given, the method will
+ *  ignore the first X items in the array when searching for `item`.
+ *  
+ *  Returns `-1` if `item` doesn’t exist in the array.
+**/
 
 if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
   i || (i = 0);
@@ -119,6 +219,16 @@ if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
   return -1;
 };
 
+/**
+ *  Array#lastIndexOf(item[, offset]) -> Number
+ *  Returns the position of the first occurrence of `item` within the array.
+ *  
+ *  The optional `offset` argument is a number. If given, the method will
+ *  ignore the final X items in the array when searching for `item`.
+ *  
+ *  Returns `-1` if `item` doesn’t exist in the array.
+**/
+
 if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i) {
   i = isNaN(i) ? this.length : (i < 0 ? this.length + i : i) + 1;
   var n = this.slice(0, i).reverse().indexOf(item);
@@ -127,6 +237,12 @@ if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i
 
 Array.prototype.toArray = Array.prototype.clone;
 
+/**
+ *  $w(string) -> Array
+ *  Splits a string into an array, treating all whitespace as delimiters.
+ *  
+ *  Equivalent to Ruby's `%w{foo bar}` or Perl's `qw(foo bar)`.
+**/
 function $w(string) {
   if (!Object.isString(string)) return [];
   string = string.strip();
