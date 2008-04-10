@@ -6,6 +6,11 @@
 var Class = {
   /**
    *  Class.create([superclass][, methods...]) -> Class
+   *  - superclass (Class): The optional superclass to inherit methods from.
+   *  - methods (Object): An object whose properties will be "mixed-in" to the
+   *      new class. Any number of mixins can be added; later mixins take
+   *      precedence.
+   *  
    *  Creates a class.
    *  
    *  Class.create returns a function that, when called, will fire its own
@@ -60,6 +65,8 @@ var Class = {
 Class.Methods = {
   /**
    *  Class#addMethods(methods) -> Class
+   *  - methods (Object): The methods to add to the class.
+   *  
    *  Adds methods to an existing class.
    *  
    *  `Class#addMethods` is a method available on classes that have been
@@ -106,6 +113,9 @@ var Abstract = { };
 
 /**
  *  Object.extend(destination, source) -> Object
+ *  - destination (Object): The object to receive the new properties.
+ *  - source (Object): The object whose properties will be duplicated.
+ *  
  *  Copies all properties from the source to the destination object. Returns
  *  the destination object.
 **/
@@ -118,6 +128,8 @@ Object.extend = function(destination, source) {
 Object.extend(Object, {
   /**
    *  Object.inspect(object) -> String
+   *  - object (Object): The item to be inspected.
+   *  
    *  Returns the debug-oriented string representation of the object.
    *  
    *  `undefined` and `null` are represented as such.
@@ -143,6 +155,8 @@ Object.extend(Object, {
   
   /**
    *  Object.toJSON(object) -> String
+   *  - object (Object): The object to be serialized.
+   *  
    *  Returns a JSON string.
    *  
    *  `undefined` and `function` types have no JSON representation. `boolean`
@@ -177,6 +191,8 @@ Object.extend(Object, {
   
   /**
    *  Object.toQueryString(object) -> String
+   *  object (Object): The object whose property/value pairs will be converted.
+   *  
    *  Turns an object into its URL-encoded query string representation.
    *  
    *  This is a form of serialization, and is mostly useful to provide complex
@@ -198,6 +214,8 @@ Object.extend(Object, {
   
   /**
    *  Object.toHTML(object) -> String
+   *  - object (Object): The object to convert to HTML.
+   *  
    *  Converts the object to its HTML representation.
    *  
    *  Returns the return value of `object`’s `toHTML` method if it exists; else
@@ -209,6 +227,8 @@ Object.extend(Object, {
   
   /**
    *  Object.keys(object) -> Array
+   *  - object (Object): The object to pull keys from.
+   *  
    *  Returns an array of the object's property names.
    *  
    *  Note that the order of the resulting array is browser-dependent — it
@@ -225,6 +245,8 @@ Object.extend(Object, {
   
   /**
    *  Object.values(object) -> Array
+   *  - object (Object): The object to pull values from.
+   *  
    *  Returns an array of the object's values.
    *  
    *  Note that the order of the resulting array is browser-dependent — it
@@ -243,6 +265,8 @@ Object.extend(Object, {
   
   /**
    *  Object.clone(object) -> Object
+   *  - object (Object): The object to clone.
+   *  
    *  Duplicates the passed object.
    *  
    *  Copies all the original's key/value pairs onto an empty object.
@@ -256,6 +280,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isElement(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is a DOM node of type 1; `false` otherwise.
   **/  
   isElement: function(object) {
@@ -264,6 +290,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isArray(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is an array; false otherwise.
   **/  
   isArray: function(object) {
@@ -273,6 +301,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isHash(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is an instance of the [[Hash]] class; `false`
    *  otherwise.
   **/  
@@ -282,6 +312,8 @@ Object.extend(Object, {
   
   /** 
    *  Object.isFunction(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is of type `function`; `false` otherwise.
   **/
   isFunction: function(object) {
@@ -290,6 +322,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isString(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is of type `string`; `false` otherwise.
   **/
   isString: function(object) {
@@ -298,6 +332,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isNumber(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is of type `number`; `false` otherwise.
   **/
   isNumber: function(object) {
@@ -306,6 +342,8 @@ Object.extend(Object, {
   
   /**
    *  Object.isUndefined(object) -> Boolean
+   *  - object (Object): The object to test.
+   *  
    *  Returns `true` if `object` is of type `string`; `false` otherwise.
   **/
   isUndefined: function(object) {
@@ -328,6 +366,8 @@ Object.extend(Function.prototype, {
   
   /**
    *  Function#bind(object[, args...]) -> Function
+   *  - object (Object): The object to bind to.
+   *  
    *  Wraps the function in another, locking its execution scope to an object
    *  specified by `object`.
   **/
@@ -341,6 +381,8 @@ Object.extend(Function.prototype, {
   
   /** related to: Function#bind
    *  Function#bindAsEventListener(object[, args...]) -> Function
+   *  - object (Object): The object to bind to.
+   *  
    *  An event-specific variant of [[Function#bind]] which ensures the function
    *  will recieve the current event object as the first argument when
    *  executing.
@@ -371,6 +413,8 @@ Object.extend(Function.prototype, {
   
   /**
    *  Function#delay(seconds[, args...]) -> Number
+   *  - seconds (Number): How long to wait before calling the function.
+   *  
    *  Schedules the function to run after the specified amount of time, passing
    *  any arguments given.
    *  
@@ -389,6 +433,8 @@ Object.extend(Function.prototype, {
   
   /**
    *  Function#wrap(wrapperFunction) -> Function
+   *  - wrapperFunction (Function): The function to act as a wrapper.
+   *  
    *  Returns a function “wrapped” around the original function.
    *  
    *  `Function#wrap` distills the essence of aspect-oriented programming into
@@ -449,7 +495,8 @@ Date.prototype.toJSON = function() {
 };
 
 /**
- *  Try.these(functions...) -> ?
+ *  Try.these(function...) -> ?
+ *  - function (Function): A function that may throw an exception.
  *  Accepts an arbitrary number of functions and returns the result of the
  *  first one that doesn't throw an error.
 **/
@@ -471,6 +518,16 @@ var Try = {
 
 RegExp.prototype.match = RegExp.prototype.test;
 
+
+/**
+ *  RegExp.escape(str) -> String
+ *  - str (String): A string intended to be used in a `RegExp` constructor.
+ *  
+ *  Escapes any characters in the string that have special meaning in a
+ *  regular expression.
+ *  
+ *  Use before passing a string into the `RegExp` constructor.
+**/
 RegExp.escape = function(str) {
   return String(str).replace(/([.*+?^=!:${}()|[\]\/\\])/g, '\\$1');
 };
@@ -483,6 +540,10 @@ RegExp.escape = function(str) {
 var PeriodicalExecuter = Class.create({
   /**
    *  new PeriodicalExecuter(callback, frequency)
+   *  - callback (Function): the function to be executed at each interval.
+   *  - frequency (Number): the amount of time, in sections, to wait in between
+   *      callbacks.
+   *  
    *  Creates an object that oversees the calling of a particular function via
    *  `window.setInterval`.
    *  

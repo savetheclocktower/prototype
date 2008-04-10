@@ -1,6 +1,9 @@
 /**
  *  $(element) -> Element
  *  $(element...) -> [Element...]
+ *  - element (Element | String): A reference to an existing DOM node _or_ a
+ *      string representing the node's ID.
+ *  
  *  If provided with a string, returns the element in the document with matching
  *  ID; otherwise returns the passed element.
  *  
@@ -52,6 +55,8 @@ if (!Node.ELEMENT_NODE) {
   });
 }
 
+/** Element **/
+
 /**
  *  class Element
 **/
@@ -85,7 +90,9 @@ Element.cache = { };
 Element.Methods = {
   /**
    *  Element.visible(@element) -> Boolean
-   *  Returns a boolean indicating whether or not element is visible (i.e.,
+   *  - element (Element | String): A reference to a DOM element.
+   *  
+   *  Returns a boolean indicating whether or not `element` is visible (i.e.,
    *  whether its inline style property is set to `display: none`).
   **/
   visible: function(element) {
@@ -94,8 +101,10 @@ Element.Methods = {
   
   /**
    *  Element.toggle(@element) -> Element
-   *  Toggles the CSS `display` of element between `none` and its native value.
-   *  Returns itself.
+   *  - element (Element | String): A reference to a DOM element.
+   *  
+   *  Toggles the CSS `display` of `element` between `none` and its native value.
+   *  Returns the element itself.
   **/
   toggle: function(element) {
     element = $(element);
@@ -105,8 +114,10 @@ Element.Methods = {
 
   /**
    *  Element.hide(@element) -> Element
-   *  Hides the element by setting its CSS `display` property to `none`. Returns
-   *  itself.
+   *  - element (Element | String): A reference to a DOM element.
+   *  
+   *  Hides `element` by setting its CSS `display` property to `none`. Returns
+   *  the element itself.
   **/
   hide: function(element) {
     $(element).style.display = 'none';
@@ -115,9 +126,11 @@ Element.Methods = {
   
   /**
    *  Element.show(@element) -> Element
-   *  Displays the element by setting its CSS `display` property to an empty
+   *  - element (Element | String): A reference to a DOM element.
+   *  
+   *  Displays `element` by setting its CSS `display` property to an empty
    *  string (deferring to a stylesheet or the element's native display state).
-   *  Returns itself.
+   *  Returns the element itself.
   **/
   show: function(element) {
     $(element).style.display = '';
@@ -126,7 +139,10 @@ Element.Methods = {
   
   /**
    *  Element.remove(@element) -> Element
-   *  Removes the element from its context in the DOM tree. Returns itself.
+   *  - element (Element | String): A reference to a DOM element.
+   *  
+   *  Removes the element from its context in the DOM tree. Returns the element
+   *  itself.
    *  
    *  The element still exists after removal and can be re-appended elsewhere
    *  in the DOM tree.
@@ -139,6 +155,9 @@ Element.Methods = {
   
   /**
    *  Element.update(@element[, content]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - content (String | Element | Object): The content to insert.
+   *  
    *  Replaces the content of element with the provided `content` argument.
    *  Returns itself.
    *  
@@ -171,6 +190,9 @@ Element.Methods = {
   
   /**
    *  Element.replace(@element[, content]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - content (String | Element | Object): The content to insert.
+   *  
    *  Replaces `element` and its contents with the provided `content` argument.
    *  Returns the removed element.
    *  
@@ -202,6 +224,9 @@ Element.Methods = {
   
   /**
    *  Element.insert(@element, content) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - content (Object | String | Element): The content to insert.
+   *  
    *  Inserts content before, after, at the top of, or at the bottom of
    *  `element`, as specified by the properties of the second argument. If the
    *  second argument is the content itself, `insert` will append it to
@@ -253,16 +278,17 @@ Element.Methods = {
   /**
    *  Element.wrap(@element[, wrapper]) -> Element
    *  Element.wrap(@element, wrapper[, attributes]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - wrapper (Element | String): An existing element to serve as the wrapper
+   *      _or_ a string representing the tag name of an element to be created.
+   *  - attributes (Object): Attributes that will be applied to the wrapper
+   *      using [[Element.writeAttribute]].
+   *  
    *  Wraps an element inside another, then returns the wrapper.
    *  
    *  If the given element exists on the page, `Element#wrap` will wrap it in
    *  place — the new element will insert itself at the same position and append
    *  the original element as its child.
-   *  
-   *  The `wrapper` argument can be either an existing element or a string
-   *  representing the tag name of an element to be created. The optional
-   *  `attributes` argument can contain a list of attribute/value pairs that
-   *  will be set on the wrapper using [[Element#writeAttribute]].
   **/
   wrap: function(element, wrapper, attributes) {
     element = $(element);
@@ -278,6 +304,8 @@ Element.Methods = {
   
   /** related to: Object.inspect
    *  Element.inspect(@element) -> String
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Returns the debug-oriented string representation of `element`.
   **/
   inspect: function(element) {
@@ -293,10 +321,12 @@ Element.Methods = {
   
   /**
    *  Element.recursivelyCollect(@element, property) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  - property (String): The name of a property of `element` that points to a
+   *      single DOM node (e.g., `parentNode`, `lastChild`).
+   *  
    *  Recursively collects elements whose relationship is specified by
-   *  `property`. property has to be a property (a method won’t do!) of
-   *  `element` that points to a single DOM node (e.g. `parentNode`,
-   *  `lastChild`). Returns an array of extended elements.
+   *  `property`. Returns an array of extended elements.
    *  
    *  Note that all of Prototype’s DOM traversal methods ignore text nodes and
    *  return element nodes only.
@@ -312,6 +342,8 @@ Element.Methods = {
   
   /**
    *  Element.ancestors(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of `element`’s ancestors and returns them as an array of
    *  extended elements.
    *  
@@ -324,6 +356,8 @@ Element.Methods = {
 
   /**
    *  Element.descendants(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of `element`’s descendants and returns them as an array of
    *  extended elements.
    *  
@@ -336,6 +370,8 @@ Element.Methods = {
   
   /**
    *  Element.firstDescendant(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Returns the first child that is _an element_. This is opposed to the
    *  `firstChild` DOM property, which will return _any node_ (often a
    *  whitespace-only text node).
@@ -351,6 +387,8 @@ Element.Methods = {
 
   /** deprecated, related to: Element.childElements
    *  Element.immediateDescendants(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of the element’s immediate descendants (i.e., children) and
    *  returns them as an array of extended elements.
    *  
@@ -369,6 +407,8 @@ Element.Methods = {
   
   /**
    *  Element.previousSiblings(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of `element`’s previous siblings and returns them as an array
    *  of extended elements.
    *  
@@ -381,6 +421,8 @@ Element.Methods = {
   
   /**
    *  Element.nextSiblings(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of `element`'s next siblings and returns them as an array of
    *  extended elements.
    *  
@@ -393,6 +435,8 @@ Element.Methods = {
   
   /**
    *  Element.siblings(@element) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Collects all of `element`’s siblings and returns them as an array of
    *  extended elements.
   **/
@@ -403,10 +447,11 @@ Element.Methods = {
   
   /**
    *  Element.match(@element, selector) -> Boolean
-   *  Checks if `element` matches the given CSS selector.
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
    *  
-   *  The `selector` argument may be either a string representing a CSS selector
-   *  or an instance of [[Selector]].
+   *  Tests if `element` matches the given CSS selector.
   **/
   match: function(element, selector) {
     if (Object.isString(selector))
@@ -418,6 +463,11 @@ Element.Methods = {
    *  Element.up(@element[, selector]) -> Element
    *  Element.up(@element[, index]) -> Element
    *  Element.up(@element, selector[, index]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  - index (Number): Number of results to skip.
+   *  
    *  Returns `element`’s first ancestor (or _n_th ancestor if `index` is
    *  specified) that matches `selector`.
    *  
@@ -436,6 +486,11 @@ Element.Methods = {
    *  Element.down(@element[, selector]) -> Element
    *  Element.down(@element[, index]) -> Element
    *  Element.down(@element, selector[, index]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  - index (Number): Number of results to skip.
+   *  
    *  Returns `element`’s first descendant (or _n_th descendant if `index` is
    *  specified) that matches `selector`.
    *  
@@ -454,6 +509,11 @@ Element.Methods = {
    *  Element.previous(@element[, selector]) -> Element
    *  Element.previous(@element[, index]) -> Element
    *  Element.previous(@element, selector[, index]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  - index (Number): Number of results to skip.
+   *  
    *  Returns `element`’s first preceding sibling (or _n_th preceding sibling if
    *  `index` is specified) that matches `selector`.
    *  
@@ -472,6 +532,11 @@ Element.Methods = {
    *  Element.next(@element[, selector]) -> Element
    *  Element.next(@element[, index]) -> Element
    *  Element.next(@element, selector[, index]) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  - index (Number): Number of results to skip.
+   *  
    *  Returns `element`’s first following sibling (or _n_th following sibling if
    *  `index` is specified) that matches `selector`.
    *  
@@ -488,6 +553,10 @@ Element.Methods = {
   
   /** related to: $$
    *  Element.select(@element, selector...)
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  
    *  Takes an arbitrary number of CSS selectors (strings) and returns an array
    *  of extended descendants of `element` that match any of them.
    *  
@@ -502,6 +571,10 @@ Element.Methods = {
   
   /**
    *  Element.adjacent(@element[, selector...]) -> [Element...]
+   *  - element (Element | String): A reference to a DOM element.
+   *  - selector (String | Selector): A string representing a CSS selector
+   *      _or_ an instance of [[Selector]]. 
+   *  
    *  Finds all siblings of `element` that match the given selector(s).
   **/
   adjacent: function() {
@@ -511,6 +584,8 @@ Element.Methods = {
   
   /**
    *  Element.identify(@element) -> String
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Returns element’s id attribute if it exists; or else sets and returns a
    *  unique, auto-generated id.
   **/
@@ -525,6 +600,9 @@ Element.Methods = {
   
   /**
    *  Element.readAttribute(@element, attribute) -> String | null
+   *  - element (Element | String): A reference to a DOM element.
+   *  - attribute (String): The name of an HTML attribute.
+   *  
    *  Returns the value of element's attribute or `null` if attribute has not
    *  been specified.
   **/
@@ -545,6 +623,12 @@ Element.Methods = {
   /**
    *  Element.writeAttribute(@element, attribute[, value = true]) -> Element
    *  Element.writeAttribute(@element, attributes) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - attribute (String): The name of an HTML attribute.
+   *  - value (String | Boolean): The value of the attribute. Handles booleans
+   *      for HTML attributes like `disabled` and `checked`.
+   *  - attributes (Object): A set of attribute/value pairs to set on `element`.
+   *  
    *  Adds, changes, or removes attributes passed either as a hash or as
    *  consecutive arguments.
   **/
@@ -570,6 +654,8 @@ Element.Methods = {
   
   /** deprecated
    *  Element.classNames(@element) -> Element.ClassNames
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Returns a new instance of `ClassNames`, an `Enumerable` object used to
    *  read and write CSS class names of `element`.
   **/
@@ -579,6 +665,9 @@ Element.Methods = {
 
   /**
    *  Element.hasClassName(@element, className) -> Boolean
+   *  - element (Element | String): A reference to a DOM element.
+   *  - className (String): A CSS class name.
+   *  
    *  Checks whether `element` has the given CSS `className`.
   **/
   hasClassName: function(element, className) {
@@ -590,6 +679,9 @@ Element.Methods = {
 
   /**
    *  Element.addClassName(@element, className) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - className (String): A CSS class name.
+   *  
    *  Adds a CSS class to `element`. Returns the element itself.
   **/
   addClassName: function(element, className) {
@@ -601,6 +693,9 @@ Element.Methods = {
 
   /**
    *  Element.removeClassName(@element, className) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - className (String): A CSS class name.
+   *  
    *  Removes `element`’s CSS `className`. Returns the element itself.
   **/
   removeClassName: function(element, className) {
@@ -612,6 +707,9 @@ Element.Methods = {
   
   /**
    *  Element.toggleClassName(@element, className) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  - className (String): A CSS class name.
+   *  
    *  Toggles `element`’s CSS `className` and returns `element`.
   **/
   toggleClassName: function(element, className) {
@@ -622,6 +720,8 @@ Element.Methods = {
   
   /**
    *  Element.cleanWhitespace(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Removes all of `element`'s text nodes which contain _only_ whitespace.
    *  Returns `element`.
   **/
@@ -639,6 +739,8 @@ Element.Methods = {
   
   /**
    *  Element.empty(@element) -> Boolean
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Tests whether element is empty (i.e. contains only whitespace).
    *  
    *  Note that this method's logic differs from the semantics of the CSS
@@ -651,6 +753,9 @@ Element.Methods = {
   
   /**
    *  Element.descendantOf(@element, ancestor) -> Boolean
+   *  - element (Element | String): A reference to a DOM element.
+   *  - element (Element): The potential ancestor of `element`.
+   *  
    *  Tests whether `element` is a descendant of `ancestor`.
   **/  
   descendantOf: function(element, ancestor) {
@@ -670,6 +775,8 @@ Element.Methods = {
   
   /**
    *  Element.scrollTo(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Scrolls the window so that `element` appears at the top of the viewport.
    *  Returns the element itself.
    *  
@@ -685,10 +792,11 @@ Element.Methods = {
   
   /**
    *  Element.getStyle(@element, property) -> String | null
-   *  Returns the given CSS property value of `element`.
+   *  - element (Element | String): A reference to a DOM element.
+   *  - property (String): The name of a CSS property. Can be specified in
+   *      either hyphenated style (`z-index`) or camelCase style (`zIndex`).
    *  
-   *  `property` can be specified in either hyphenated style (`z-index`) or
-   *  camelCase style (`zIndex`).
+   *  Returns the given CSS property value of `element`.
   **/
   getStyle: function(element, style) {
     element = $(element);
@@ -708,10 +816,11 @@ Element.Methods = {
   
   /**
    *  Element.setStyle(@element, styles) -> Element
-   *  Modifies `element`’s CSS style properties.
+   *  - element (Element | String): A reference to a DOM element.
+   *  - styles (Object): An object of property/value pairs in which the 
+   *      properties are specified _in their camelized form_.
    *  
-   *  Styles are passed as an object of property-value pairs in which the
-   *  properties are specified _in their camelized form_.
+   *  Modifies `element`’s CSS style properties.
   **/
   setStyle: function(element, styles) {
     element = $(element);
@@ -740,6 +849,8 @@ Element.Methods = {
   
   /**
    *  Element.makePositioned(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Allows for the easy creation of a CSS containing block by setting
    *  `element`'s CSS position to `relative` if its initial position is either
    *  `static` or `undefined`. Returns the element itself.
@@ -762,6 +873,8 @@ Element.Methods = {
 
   /** related to: Element.makePositioned
    *  Element.undoPositioned(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Sets element back to the state it was in _before_
    *  [[Element.makePositioned]] was applied. Returns the element itself.
   **/
@@ -780,6 +893,8 @@ Element.Methods = {
 
   /**
    *  Element.makeClipping(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Simulates the poorly-supported CSS `clip` property by setting `element`'s
    *  `overflow` value to `hidden`. Returns the element itself.
   **/
@@ -794,6 +909,8 @@ Element.Methods = {
   
   /** related to: Element.makeClipping
    *  Element.undoClipping(@element) -> Element
+   *  - element (Element | String): A reference to a DOM element.
+   *  
    *  Sets `element`’s CSS `overflow` property back to the value it had _before_
    *  [[Element.makeClipping]] was applied. Returns the element itself.
   **/
@@ -809,12 +926,12 @@ Element.Methods = {
 Element.Methods.identify.counter = 1;
 
 Object.extend(Element.Methods, {
-  /** deprecated, alias of: Element#select
+  /** deprecated, alias of: Element.select
    *  Element.getElementsBySelector(@element, selector...) -> [Element...]
   **/
   getElementsBySelector: Element.Methods.select,
-  /**
-   *  Element.immediateDescendants(@element) -> [Element...]
+  /** alias of: Element.immediateDescendants
+   *  Element.childElements(@element) -> [Element...]
   **/  
   childElements: Element.Methods.immediateDescendants
 });
@@ -1211,6 +1328,8 @@ if (!Prototype.BrowserFeatures.ElementExtensions &&
 
 /**
  *  Element.extend(element) -> Element
+ *  - element (Element | String): A reference to a DOM element.
+ *  
  *  Extends `element` with _all_ of the methods contained in `Element.Methods`
  *  and `Element.Methods.Simulated`.
  *  
@@ -1269,6 +1388,11 @@ Element.hasAttribute = function(element, attribute) {
 /**
  *  Element.addMethods([methods]) -> undefined
  *  Element.addMethods(tagName, methods) -> undefined
+ *  - tagName (String | Array): The name of an HTML element (or an array of
+ *      names) on which to add the given methods. If omitted, will add methods
+ *      to _all_ HTML elements.
+ *  - methods (Object): A set of name/value pairs in which the values are
+ *      functions.
  *  
  *  Takes an object of methods and makes them available as methods of extended
  *  elements and of the `Element` object.

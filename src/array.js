@@ -1,12 +1,13 @@
 /** alias: Array.from
  *  $A(iterable) -> Array
- *  Accepts an array-like collection (anything with numeric indices) and
- *  returns its equivalent as an actual `Array` object.
+ *  - iterable (Object): An array-like collection (anything with numeric
+ *      indices).
+ *  
+ *  Coerces an "array-like" collection into an actual array.
  *  
  *  This method is a convenience alias of [[Array.from]], but is the preferred
  *  way of casting to an `Array`.
 **/
-
 function $A(iterable) {
   if (!iterable) return [];
   if (iterable.toArray) return iterable.toArray();
@@ -32,7 +33,6 @@ Array.from = $A;
  *  class Array
  *  includes Enumerable
 **/
-
 Object.extend(Array.prototype, Enumerable);
 
 if (!Array.prototype._reverse) Array.prototype._reverse = Array.prototype.reverse;
@@ -96,6 +96,8 @@ Object.extend(Array.prototype, {
   
   /**
    *  Array#without(value...) -> Array
+   *  - value (?): A value to exclude.
+   *  
    *  Produces a new version of the array that does not contain any of the
    *  specified values.
   **/
@@ -108,9 +110,10 @@ Object.extend(Array.prototype, {
 
   /**
    *  Array#reverse(inline = false) -> Array
-   *  Returns the reversed version of the array. By default, directly reverses
-   *  the original. If `inline` is set to `false`, uses a clone of the original
-   *  array.   
+   *  - inline (Boolean): Whether to modify the array in place. If `false`,
+   *      clones the original array first.
+   *  
+   *  Returns the reversed version of the array.
   **/
   reverse: function(inline) {
     return (inline !== false ? this : this.toArray())._reverse();
@@ -127,12 +130,11 @@ Object.extend(Array.prototype, {
   
   /**
    *  Array#uniq(sorted = false)
+   *  - sorted (Boolean): Whether the array has already been sorted. If `true`,
+   *      a less-costly algorithm will be used.
+   *  
    *  Produces a duplicate-free version of an array. If no duplicates are
    *  found, the original array is returned.
-   *  
-   *  The optional `sorted` argument tells the method whether the array has
-   *  has already been sorted. If so, the method will use a less-costly
-   *  algorithm.
   **/  
   uniq: function(sorted) {
     return this.inject([], function(array, value, index) {
@@ -144,6 +146,8 @@ Object.extend(Array.prototype, {
   
   /**
    *  Array#intersect(array) -> Array
+   *  - array (Array): A collection of values.
+   *  
    *  Returns an array containing every item that is shared between the two
    *  given arrays.
   **/
@@ -201,15 +205,14 @@ if (Object.isFunction(Array.prototype.forEach))
   
   
 /**
- *  Array#indexOf(item[, offset]) -> Number
- *  Returns the position of the first occurrence of `item` within the array.
+ *  Array#indexOf(item[, offset = 0]) -> Number
+ *  - item (?): A value that may or may not be in the array.
+ *  - offset (Number): The number of initial items to skip before beginning the
+ *      search.
  *  
- *  The optional `offset` argument is a number. If given, the method will
- *  ignore the first X items in the array when searching for `item`.
- *  
- *  Returns `-1` if `item` doesn’t exist in the array.
+ *  Returns the position of the first occurrence of `item` within the array — or
+ *  `-1` if `item` doesn’t exist in the array.
 **/
-
 if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
   i || (i = 0);
   var length = this.length;
@@ -221,14 +224,13 @@ if (!Array.prototype.indexOf) Array.prototype.indexOf = function(item, i) {
 
 /**
  *  Array#lastIndexOf(item[, offset]) -> Number
- *  Returns the position of the first occurrence of `item` within the array.
+ *  - item (?): A value that may or may not be in the array.
+ *  - offset (Number): The number of items at the end to skip before beginning
+ *      the search.
  *  
- *  The optional `offset` argument is a number. If given, the method will
- *  ignore the final X items in the array when searching for `item`.
- *  
- *  Returns `-1` if `item` doesn’t exist in the array.
+ *  Returns the position of the last occurrence of `item` within the array — or
+ *  `-1` if `item` doesn’t exist in the array.
 **/
-
 if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i) {
   i = isNaN(i) ? this.length : (i < 0 ? this.length + i : i) + 1;
   var n = this.slice(0, i).reverse().indexOf(item);
@@ -239,6 +241,8 @@ Array.prototype.toArray = Array.prototype.clone;
 
 /**
  *  $w(string) -> Array
+ *  - string (String): A string with zero or more spaces.
+ *  
  *  Splits a string into an array, treating all whitespace as delimiters.
  *  
  *  Equivalent to Ruby's `%w{foo bar}` or Perl's `qw(foo bar)`.

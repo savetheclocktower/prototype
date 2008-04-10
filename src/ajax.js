@@ -2,12 +2,13 @@
 **/
 
 
-/**
- *  Ajax.getTransport() -> XMLHttpRequest
- *  Returns a new instance of XMLHttpRequest (or its ActiveXObject
- *  equivalent in the case of Internet Explorer). 
-**/
+/** Ajax **/
 var Ajax = {
+  /**
+   *  Ajax.getTransport() -> XMLHttpRequest
+   *  Returns a new instance of XMLHttpRequest (or its ActiveXObject
+   *  equivalent in the case of Internet Explorer). 
+  **/
   getTransport: function() {
     return Try.these(
       function() {return new XMLHttpRequest()},
@@ -19,7 +20,7 @@ var Ajax = {
   activeRequestCount: 0
 };
 
-
+/** Ajax.Responders **/
 Ajax.Responders = {
   /**
    *  Ajax.Responders.responders = Array
@@ -32,9 +33,7 @@ Ajax.Responders = {
   
   /**
    *  Ajax.Responders.register(responders) -> undefined
-   *  Attaches global responders for the life cycle of every Ajax request.
-   *  
-   *  Expects an Object with any number of key/value pairs. The key can be any
+   *  - responders (Object): An object with any number of key/value pairs. The key can be any
    *  one of `onCreate`, `onUninitialized`, `onLoading`,`onLoaded`,
    *  `onInteractive`, `onComplete`, `onSuccess`, `onFailure`, or `onXXX`, 
    *  where XXX is any HTTP status code. The value is a function that will
@@ -42,9 +41,10 @@ Ajax.Responders = {
    *  XMLHttpRequest object; and the evaluated JSON, if any, that was delivered
    *  in the response.
    *  
+   *  Attaches global responders for the life cycle of every Ajax request.
+   *  
    *  To remove responders, use [[Ajax.Responders.unregister]].
   **/
-
   register: function(responder) {
     if (!this.include(responder))
       this.responders.push(responder);
@@ -52,12 +52,11 @@ Ajax.Responders = {
   
   /**
    *  Ajax.Responders.unregister(responders) -> undefined
-   *  Detaches global responders for the life cycle of every Ajax request.
+   *  - responders (Object): A reference to an object previously passed into
+   *      [[Ajax.Responders.register]].
    *  
-   *  Must be a reference to an earlier object passed to
-   *  [[Ajax.Responders.register]].
-  **/
-  
+   *  Detaches global responders for the life cycle of every Ajax request.
+  **/  
   unregister: function(responder) {
     this.responders = this.responders.without(responder);
   },
@@ -83,7 +82,6 @@ Ajax.Responders.register({
 /**
  *  class Ajax.Base
 **/
-
 Ajax.Base = Class.create({
   initialize: function(options) {
     this.options = {
@@ -109,7 +107,6 @@ Ajax.Base = Class.create({
 /**
  *  class Ajax.Request < Ajax.Base
 **/
-
 Ajax.Request = Class.create(Ajax.Base, {
   _complete: false,
   
@@ -379,11 +376,15 @@ Ajax.Response = Class.create({
 /**
  *  class Ajax.Updater < Ajax.Request
 **/
-
 Ajax.Updater = Class.create(Ajax.Request, {
   /**
    *  new Ajax.Updater(container, url, options)
-   *  Creates and dispatches an XmlHttpRequest, then fills the given element
+   *  - container(Element | String): A reference to a DOM element.
+   *  - url (String): The URL to request. Must be on the same server as the
+   *      requesting page.
+   *  - options (Object): A set of key/value pairs for customizing the request.
+   *  
+   *  Creates and dispatches an `XmlHttpRequest`, then fills the given element
    *  with the text of the response.
   **/
   initialize: function($super, container, url, options) {
@@ -424,10 +425,14 @@ Ajax.Updater = Class.create(Ajax.Request, {
 /**
  *  class Ajax.PeriodicalUpdater < Ajax.Base
 **/
-
 Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
   /**
    *  new Ajax.PeriodicalUpdater(container, url, options)
+   *  - container(Element | String): A reference to a DOM element.
+   *  - url (String): The URL to request. Must be on the same server as the
+   *      requesting page.
+   *  - options (Object): A set of key/value pairs for customizing the updater.
+   *  
    *  Periodically performs an Ajax request and updates a container’s contents
    *  based on the response text.
    *  
@@ -452,17 +457,15 @@ Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {
    *  Ajax.PeriodicalUpdater#start() -> undefined
    *  Triggers a `PeriodicalUpdater`'s Ajax request.
   **/
-
   start: function() {
     this.options.onComplete = this.updateComplete.bind(this);
     this.onTimerEvent();
   },
   
   /**
-   *  Ajax.PeriodicalUpdater#stop -> undefined
+   *  Ajax.PeriodicalUpdater#stop() -> undefined
    *  Pauses a `PeriodicalUpdater`.
   **/
-
   stop: function() {
     this.updater.options.onComplete = undefined;
     clearTimeout(this.timer);
