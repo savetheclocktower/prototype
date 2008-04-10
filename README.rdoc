@@ -29,7 +29,7 @@ like so:
 the <tt>src/</tt> directory. To build Prototype, you'll need:
 
 * a copy of the Prototype source tree, either from a distribution tarball or
-  from the Subversion repository (see below)
+  from the GitHub repository
 * Ruby 1.8.2 or higher (http://www.ruby-lang.org/)
 * Rake -- Ruby Make (http://rake.rubyforge.org/)
 * RDoc, if your Ruby distribution does not include it
@@ -42,9 +42,6 @@ From the root Prototype directory,
   <tt>pkg/</tt> directory.
 
 == Contributing to Prototype
-
-Check out the Prototype source with 
-  $ svn co http://svn.rubyonrails.org/rails/spinoffs/prototype/trunk/ prototype
 
 Find out how to contribute:
   http://prototypejs.org/contribute
