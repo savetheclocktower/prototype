@@ -66,29 +66,29 @@ Element.Layout = Class.create({
 
       // For backwards-compatibility, the returned object will have
       // width and height equal to the padding-box values.
-      this.dimensions.update(paddingBox);
+      this.layout.update(paddingBox);
 
-      this.dimensions.set('paddingBox', paddingBox);
+      this.layout.set('paddingBox', paddingBox);
 
       var padding = this.getStyleValuesFor('padding', 'trbl');
-      this.dimensions.set('padding', padding);
+      this.layout.set('padding', padding);
 
       var contentBox = {
         width:  paddingBox.width  - padding.left - padding.right,
         height: paddingBox.height - padding.top  - padding.bottom
       };
 
-      this.dimensions.set('contentBox', contentBox);
+      this.layout.set('contentBox', contentBox);
 
       var border = this.getStyleValuesFor('border', 'trbl');
-      this.dimensions.set('border', border);
+      this.layout.set('border', border);
 
       var borderBox = {
         width:  paddingBox.width  + border.left + border.right,
         height: paddingBox.height + border.top  + border.bottom
       };
 
-      this.dimensions.set('borderBox', borderBox);
+      this.layout.set('borderBox', borderBox);
       
     } // dimensions
     
@@ -101,8 +101,8 @@ Element.Layout = Class.create({
       offsets.scroll     = this.scrollOffset();
       offsets.document   = this.documentOffset();
       
-      this.dimensions.update('offsets', offsets);
-    } // offsets  
+      this.layout.update('offsets', offsets);
+    } // offsets
     
     // If we altered the element's styles, return them to their
     // original values.
@@ -110,14 +110,14 @@ Element.Layout = Class.create({
       Object.extend(style, originalStyle);
     }
     
-    return this.layout;        
+    return this.layout;
   },
   
   // Converts a raw CSS value like '9px' or '1em' to
-  // a number (in pixels). 
+  // a number (in pixels).
   // IE: Redefined below
-  cssToNumber: function(property) {    
-    return window.parseFloat(this.element.getStyle(property));    
+  cssToNumber: function(property) {
+    return window.parseFloat(this.element.getStyle(property));
   },
   
   // sidesNeeded argument is a string.
@@ -146,19 +146,19 @@ Element.Layout = Class.create({
   },
   
   toObject: function() {
-    return this.dimensions.toObject();
+    return this.layout.toObject();
   },
   
   toHash: function() {
-    return this.dimensions;
+    return this.layout;
   },
   
   toJSON: function() {
-    return this.dimensions.toJSON();
+    return this.layout.toJSON();
   },
   
   toCSS: function() {
-    var css = {}, d = this.dimensions;
+    var css = {}, d = this.layout;
     if (this.options.dimensions) {
       var margins = $w('top right bottom left').map( function(side) {
         return d.margin[side] + 'px';
@@ -190,8 +190,8 @@ Element.Layout = Class.create({
    *  Reports the dimensions of the given element.
   **/
   dimensions: function() {
-    var l = this.layout;
-    return { width: l.contentBox.width, height: l.contentBox.height };
+    var box = this.layout.get('contentBox');
+    return { width: box.width, height: box.height };
   },  
   
   /**
@@ -199,7 +199,7 @@ Element.Layout = Class.create({
    *  Positioned offset. Measured from offset parent.
   **/  
   offset: function() {
-    return this.dimensions.offsets.positioned;
+    return this.layout.offsets.positioned;
   },
   
   /** 
@@ -340,15 +340,23 @@ Object.extend(Element.Methods, {
    *  when speed is of the utmost importance.
   **/  
   getLayout: function(element, options) {
-    return new Element.Layout($(element), options).toObject();
+    return new Element.Layout(element, options).toObject();
   },
   
   getDimensions: function(element) {
-    return new Element.Layout($(element), { offsets: false }).toObject();
+    return new Element.Layout(element, { offsets: false }).toObject();
+  },
+  
+  getHeight: function(element) {
+    return Element.getDimensions(element).height;
+  },
+  
+  getWidth: function(element) {
+    return Element.getDimensions(element).width;
   },
   
   getOffsets: function(element) {
-    return new Element.Layout($(element), { dimensions: false}).toObject();
+    return new Element.Layout(element, { dimensions: false}).toObject();
   },
     
   viewportOffset: function(element) {
