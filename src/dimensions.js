@@ -1,13 +1,12 @@
-/** 
- *  class Element.Dimensions
+/**
+ *  class Element.Layout
 **/
-Element.Dimensions = Class.create({
+Element.Layout = Class.create({
   /**
-   *  new Element.Dimensions(element[, options])
+   *  new Element.Layout(element[, options])
    *  Returns a versatile measurement object that quacks several ways. Can be
-   *  coerced into a hash, an object, or JSON. Used by the Element instance
-   *  methods that measure dimensions and offsets.
-   **/
+   *  coerced into a hash, an object, or JSON. 
+  **/
   initialize: function(element, options) {
     this.element = $(element);
     this.options = Object.extend({
@@ -15,7 +14,7 @@ Element.Dimensions = Class.create({
       offsets:    false  
     }, options || {});
     
-    this.dimensions = new Hash();
+    this.layout = new Hash();
     
     this.getDimensions();
   },
@@ -97,17 +96,10 @@ Element.Dimensions = Class.create({
     if (this.options.offsets === true) {
       var offsets = {};
       
-      var v = element.viewportOffset();
-      offsets.viewport = { top: v.top, left: v.left };
-      
-      var p = element.positionedOffset();
-      offsets.positioned = { top: p.top, left: p.left };
-      
-      var s = element.cumulativeScrollOffset();
-      offsets.scroll = { top: s.top, left: s.left };
-      
-      var c = element.cumulativeOffset();
-      offsets.cumulative = { top: c.top, left: c.left };
+      offsets.positioned = this.offset();
+      offsets.viewport   = this.viewportOffset();
+      offsets.scroll     = this.scrollOffset();
+      offsets.document   = this.documentOffset();
       
       this.dimensions.update('offsets', offsets);
     } // offsets  
@@ -118,7 +110,7 @@ Element.Dimensions = Class.create({
       Object.extend(style, originalStyle);
     }
     
-    return this.dimensions;        
+    return this.layout;        
   },
   
   // Converts a raw CSS value like '9px' or '1em' to
@@ -163,11 +155,144 @@ Element.Dimensions = Class.create({
   
   toJSON: function() {
     return this.dimensions.toJSON();
-  }
+  },
+  
+  toCSS: function() {
+    var css = {}, d = this.dimensions;
+    if (this.options.dimensions) {
+      var margins = $w('top right bottom left').map( function(side) {
+        return d.margin[side] + 'px';
+      }).join(' ');
+      var padding = $w('top right bottom left').map( function(side) {
+        return d.padding[side] + 'px';
+      }).join(' ');
+      
+      Object.extend(css, {
+        width:   d.contentBox.width  + 'px',
+        height:  d.contentBox.height + 'px',
+        margin:  margins,
+        padding: padding
+      });
+    }
+    
+    if (this.options.offsets) {
+      Object.extend(css, {
+        left: d.offset.left + 'px',
+        top:  d.offset.top  + 'px'
+      });
+    }
+    
+    return css;
+  },
+  
+  /** 
+   *  Element.Layout#dimensions() -> Element.Coordinates
+   *  Reports the dimensions of the given element.
+  **/
+  dimensions: function() {
+    var l = this.layout;
+    return { width: l.contentBox.width, height: l.contentBox.height };
+  },  
+  
+  /**
+   *  Element.Layout#offset([element=document]) -> Element.Coordinates
+   *  Positioned offset. Measured from offset parent.
+  **/  
+  offset: function() {
+    return this.dimensions.offsets.positioned;
+  },
+  
+  /** 
+   *  Element.Layout#viewportOffset() -> Element.Coordinates
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of the viewport.
+  **/    
+  viewportOffset: function() {
+    var element = this.element;
+
+    // IE and FF >= 3 provide getBoundingClientRect, a much quicker path
+    // to retrieving viewport offset.   
+    if (element.getBoundingClientRect) {
+      var d = element.getBoundingClientRect();
+      return { left: Math.round(d.left), top: Math.round(d.top) };
+    }
+    
+    var valueT = 0, valueL = 0, element = this.element;
+
+    // First collect cumulative offsets
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+
+      // Safari fix
+      if (element.offsetParent == document.body &&
+        Element.getStyle(element, 'position') === 'absolute') break;
+
+    } while (element = element.offsetParent);
+
+    // Then subtract cumulative scroll offsets
+    element = this.element;
+    do {
+      if (!Prototype.Browser.Opera || element.tagName.toUpperCase() == 'BODY') {
+        valueT -= element.scrollTop  || 0;
+        valueL -= element.scrollLeft || 0;
+      }
+    } while (element = element.parentNode);
+
+    return { left: valueL, top: valueT };
+  },
+  
+  /** 
+   *  Element.Layout#documentOffset() -> Element.Coords
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of its containing document.
+  **/  
+  documentOffset: function() {
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+      element = element.offsetParent;
+    } while (element);
+    return Element.Layout.normalize({ left: valueL, top: valueT });    
+  },
+  
+  /** 
+   *  Element.Layout#offsetParent() -> Element
+   *  Returns the element's positioning context — the nearest ancestor
+   *  with a CSS "position" value other than "static."
+  **/  
+  offsetParent: function(element) {
+    if (element.offsetParent) return $(element.offsetParent);
+    if (element == document.body) return $(element);
+    
+    while ((element = element.parentNode) && element !== document.body)
+      if (Element.getStyle(element, 'position') !== 'static')
+        return element;
+
+    return $(document.body);
+  },
+  
+  /** 
+   *  Element.Layout#scrollOffset(@element) -> Object
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of its containing document, compensating for the scroll
+   *  offsets of any ancestors.
+  **/  
+  scrollOffset: function(element) {
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.scrollTop  || 0;
+      valueL += element.scrollLeft || 0; 
+      element = element.parentNode;
+    } while (element);
+    return Element.Layout.normalize({ left: valueL, top: valueT });
+  }  
+  
 });
 
 if (Prototype.Browser.IE) {
-  Element.Dimensions.addMethods({
+  Element.Layout.addMethods({
     // IE gives the literal cascaded style, not the computed style.
     // We need to ensure pixel values are returned.
     cssToNumber: function(property) {
@@ -196,7 +321,7 @@ if (Prototype.Browser.IE) {
 }
 
 // Acts like an array for backwards-compatibility.
-Element.Dimensions.normalize = function(obj) {
+Element.Layout.normalize = function(obj) {
   var arr = [];
   arr[0] = ('left' in obj) ? obj.left : obj.width;
   arr[1] = ('top'  in obj) ? obj.top  : obj.height;
@@ -205,75 +330,33 @@ Element.Dimensions.normalize = function(obj) {
 
 Object.extend(Element.Methods, {
   /** 
-   *  Element#getDimensions(@element[, options]) -> Object
+   *  Element#getLayout(@element[, options]) -> Object
    *  Reports the dimensions and offsets of the given element.
    *
-   *  By default, `getDimensions` will return as much information about the
+   *  By default, `getLayout` will return as much information about the
    *  element as possible: dimensions for the content, padding, and border
    *  boxes; and viewport, cumulative, scroll, and positioned offsets.
    *  The `options` argument can be used to bypass checks you don't need
    *  when speed is of the utmost importance.
   **/  
-  getDimensions: function(element, options) {
-    return new Element.Dimensions(element, options).toObject();
-  },  
-  
-  
-  /** 
-   *  Element#viewportOffset(@element) -> Object
-   *  Reports the element's top- and left-distance from the upper-left
-   *  corner of the viewport.
-  **/    
-  viewportOffset: function(forElement) {
-    forElement = $(forElement);
-
-    // IE and FF >= 3 provide getBoundingClientRect, a much quicker path
-    // to retrieving viewport offset.   
-    if (forElement.getBoundingClientRect) {
-      var d = forElement.getBoundingClientRect();
-      return Element.Dimensions.normalize({
-       left: Math.round(d.left), top: Math.round(d.top) });
-    }
-    
-    var valueT = 0, valueL = 0, element = forElement;
-
-    // First collect cumulative offsets
-    do {
-      valueT += element.offsetTop  || 0;
-      valueL += element.offsetLeft || 0;
-
-      // Safari fix
-      if (element.offsetParent == document.body &&
-        Element.getStyle(element, 'position') === 'absolute') break;
-
-    } while (element = element.offsetParent);
-
-    
-    // Then subtract cumulative scroll offsets
-    element = forElement;
-    do {
-      if (!Prototype.Browser.Opera || element.tagName.toUpperCase() == 'BODY') {
-        valueT -= element.scrollTop  || 0;
-        valueL -= element.scrollLeft || 0;
-      }
-    } while (element = element.parentNode);
-
-    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+  getLayout: function(element, options) {
+    return new Element.Layout($(element), options).toObject();
   },
   
-  /** 
-   *  Element#cumulativeOffset(@element) -> Object
-   *  Reports the element's top- and left-distance from the upper-left
-   *  corner of its containing document.
-  **/  
+  getDimensions: function(element) {
+    return new Element.Layout($(element), { offsets: false }).toObject();
+  },
+  
+  getOffsets: function(element) {
+    return new Element.Layout($(element), { dimensions: false}).toObject();
+  },
+    
+  viewportOffset: function(element) {
+    return Element.getOffsets(element).viewport;
+  },
+  
   cumulativeOffset: function(element) {
-    var valueT = 0, valueL = 0;
-    do {
-      valueT += element.offsetTop  || 0;
-      valueL += element.offsetLeft || 0;
-      element = element.offsetParent;
-    } while (element);
-    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+    return Element.getOffsets(element).document;
   },
   
   /** 
@@ -283,13 +366,7 @@ Object.extend(Element.Methods, {
    *  offsets of any ancestors.
   **/  
   cumulativeScrollOffset: function(element) {
-    var valueT = 0, valueL = 0;
-    do {
-      valueT += element.scrollTop  || 0;
-      valueL += element.scrollLeft || 0; 
-      element = element.parentNode;
-    } while (element);
-    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+    return Element.getOffsets(element).scroll;    
   },
   
   /** 
@@ -298,17 +375,7 @@ Object.extend(Element.Methods, {
    *  parent.
   **/  
   positionedOffset: function(element) {
-    var valueT = 0, valueL = 0;
-    do {
-      valueT += element.offsetTop  || 0;
-      valueL += element.offsetLeft || 0;
-      element = element.offsetParent;
-      if (element) {
-        if (element.tagName.toUpperCase() == 'BODY') break;
-        if (Element.getStyle(element, 'position') !== 'static') break;
-      }
-    } while (element);
-    return Element.Dimensions.normalize({ left: valueL, top: valueT });
+    return Element.getOffsets(element).positioned;
   },
   
   /** 
@@ -400,30 +467,15 @@ Object.extend(Element.Methods, {
 
     // find page position of source
     source = $(source);
-    var p = source.viewportOffset();
-
-    // find coordinate system to use
-    element = $(element);
-    var delta = [0, 0];
-    var parent = null;
-    // delta [0,0] will do fine with position: fixed elements, 
-    // position:absolute needs offsetParent deltas
-    if (Element.getStyle(element, 'position') == 'absolute') {
-      parent = element.getOffsetParent();
-      delta = parent.viewportOffset();
-    }
-
-    // correct by body offsets (fixes Safari)
-    if (parent == document.body) {
-      delta[0] -= document.body.offsetLeft;
-      delta[1] -= document.body.offsetTop; 
-    }
-
-    // set position
-    if (options.setLeft)   element.style.left  = (p[0] - delta[0] + options.offsetLeft) + 'px';
-    if (options.setTop)    element.style.top   = (p[1] - delta[1] + options.offsetTop) + 'px';
-    if (options.setWidth)  element.style.width = source.offsetWidth + 'px';
-    if (options.setHeight) element.style.height = source.offsetHeight + 'px';
+    var sourceLayout = new Element.Layout(source).toCSS();
+    
+    if (!options.setHeight) delete sourceLayout.height;
+    if (!options.setWidth)  delete sourceLayout.width;
+    if (!options.setLeft)   delete sourceLayout.left;
+    if (!options.setTop)    delete sourceLayout.top;
+    
+    $(element).setStyle(souceLayout);
+    
     return element;
   }
 });
@@ -431,7 +483,7 @@ Object.extend(Element.Methods, {
 
 document.viewport = {
   /** 
-   *  document.viewport.getDimensions() -> Object
+   *  document.viewport.getDimensions () -> Object
    *  Returns the height and width of the browser viewport.
   **/  
   getDimensions: function() {
@@ -465,7 +517,7 @@ document.viewport = {
    *  document.viewport.getScrollOffsets() -> Object
    *  Returns the distances the viewport has been scrolled in the
    *  horizontal and vertical directions.
-  **/  
+  **/
   getScrollOffsets: function() {
     return Element.Dimensions.normalize({
       left: window.pageXOffset 
