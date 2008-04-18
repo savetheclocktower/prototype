@@ -197,10 +197,14 @@ Object.extend(Event, (function() {
     c[eventName] = c[eventName].without(findWrapper(id, eventName, handler));
   }
   
-  function destroyCache() {
-    for (var id in cache)
-      for (var eventName in cache[id])
-        cache[id][eventName] = null;
+  // Loop through all elements and remove all handlers on page unload. IE
+  // needs this in order to prevent memory leaks.
+  function purgeListeners() {
+    var all = document.getElementsByTagName('*');    
+    for (var i, node; node = all[i]; i++) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
+      Element.stopObserving(node);
+    }
   }
   
   function onStop() {
@@ -218,7 +222,7 @@ Object.extend(Event, (function() {
   if (window.attachEvent) {
     // Internet Explorer needs to remove event handlers on page unload
     // in order to avoid memory leaks.
-    window.attachEvent("onunload", destroyCache);
+    window.attachEvent("onunload", purgeListeners);
 
     // IE also doesn't fire the unload event if the page is navigated away
     // from before it's done loading. Workaround adapted from
