@@ -1,3 +1,5 @@
+* Fix issue where IE fails to GC when the page is navigated away from before it's done loading. (jddalton, Andrew Dupont)
+
 * Fix issue where Safari improperly reports an element as a descendant of itself.
 
 * Greatly simplify IE's implementation of Element#descendantOf.
