@@ -878,23 +878,11 @@ else if (Prototype.Browser.IE) {
     });
   })(Element._attributeTranslations.read.values);
 
-  // Wrap Element#update and Element#replace to clean up event handlers on 
+  // Wrap Element#update to clean up event handlers on 
   // newly-removed elements. Prevents memory leaks in IE.  
-  Element._purgeObservers = function(element, includeRoot) {
-    Element.select(element, '*').each(Event.stopObserving);
-    if (includeRoot === true) Event.stopObserving(element);
-  };
-    
   Element.Methods.update = Element.Methods.update.wrap(
     function(proceed, element, contents) {
-      Element._purgeObservers(element, false);
-      return proceed(element, contents);
-    }
-  );
-  
-  Element.Methods.replace = Element.Methods.replace.wrap(
-    function(proceed, element, contents) {
-      Element._purgeObservers(element, true);
+      Element.select(element, '*').each(Event.stopObserving);
       return proceed(element, contents);
     }
   );  
