@@ -11,15 +11,14 @@ Element.Layout = Class.create({
     this.element = $(element);
     this.options = Object.extend({
       dimensions: true,
-      offsets:    false  
+      offsets:    true  
     }, options || {});
     
-    this.layout = new Hash();
-    
-    this.getDimensions();
+    this.layout = {};
+    this.getLayout();
   },
   
-  getDimensions: function() {
+  getLayout: function() {
     var element = this.element, 
         display = element.getStyle('display'),
         noOffsetWidth;
@@ -66,29 +65,29 @@ Element.Layout = Class.create({
 
       // For backwards-compatibility, the returned object will have
       // width and height equal to the padding-box values.
-      this.layout.update(paddingBox);
-
-      this.layout.set('paddingBox', paddingBox);
+      Object.extend(this.layout, paddingBox);
+      
+      this.layout.paddingBox = paddingBox;
 
       var padding = this.getStyleValuesFor('padding', 'trbl');
-      this.layout.set('padding', padding);
+      this.layout.padding = padding;
 
       var contentBox = {
         width:  paddingBox.width  - padding.left - padding.right,
         height: paddingBox.height - padding.top  - padding.bottom
       };
-
-      this.layout.set('contentBox', contentBox);
+      
+      this.layout.contentBox = contentBox;
 
       var border = this.getStyleValuesFor('border', 'trbl');
-      this.layout.set('border', border);
+      this.layout.border = border;
 
       var borderBox = {
         width:  paddingBox.width  + border.left + border.right,
         height: paddingBox.height + border.top  + border.bottom
       };
-
-      this.layout.set('borderBox', borderBox);
+      
+      this.layout.borderBox = borderBox;
       
     } // dimensions
     
@@ -101,7 +100,7 @@ Element.Layout = Class.create({
       offsets.scroll     = this.scrollOffset();
       offsets.document   = this.documentOffset();
       
-      this.layout.update('offsets', offsets);
+      this.layout.offsets = offsets;
     } // offsets
     
     // If we altered the element's styles, return them to their
@@ -146,15 +145,15 @@ Element.Layout = Class.create({
   },
   
   toObject: function() {
-    return this.layout.toObject();
-  },
-  
-  toHash: function() {
     return this.layout;
   },
   
+  toHash: function() {
+    return $H(this.layout);
+  },
+  
   toJSON: function() {
-    return this.layout.toJSON();
+    return Object.toJSON(this.layout);
   },
   
   toCSS: function() {
@@ -190,7 +189,7 @@ Element.Layout = Class.create({
    *  Reports the dimensions of the given element.
   **/
   dimensions: function() {
-    var box = this.layout.get('contentBox');
+    var box = this.layout.contentBox;
     return { width: box.width, height: box.height };
   },  
   
@@ -199,7 +198,19 @@ Element.Layout = Class.create({
    *  Positioned offset. Measured from offset parent.
   **/  
   offset: function() {
-    return this.layout.offsets.positioned;
+    var element = this.element;
+    var valueT = 0, valueL = 0;
+    do {
+      valueT += element.offsetTop  || 0;
+      valueL += element.offsetLeft || 0;
+      element = element.offsetParent;
+      if (element) {
+        if (element.tagName.toUpperCase() == 'BODY') break;
+        var p = Element.getStyle(element, 'position');
+        if (p !== 'static') break;
+      }
+    } while (element);
+    return Element.Layout.normalize({ left: valueL, top: valueT });
   },
   
   /** 
@@ -248,6 +259,7 @@ Element.Layout = Class.create({
    *  corner of its containing document.
   **/  
   documentOffset: function() {
+    var element = this.element;
     var valueT = 0, valueL = 0;
     do {
       valueT += element.offsetTop  || 0;
@@ -262,7 +274,8 @@ Element.Layout = Class.create({
    *  Returns the element's positioning context — the nearest ancestor
    *  with a CSS "position" value other than "static."
   **/  
-  offsetParent: function(element) {
+  offsetParent: function() {
+    var element = this.element;
     if (element.offsetParent) return $(element.offsetParent);
     if (element == document.body) return $(element);
     
@@ -279,7 +292,8 @@ Element.Layout = Class.create({
    *  corner of its containing document, compensating for the scroll
    *  offsets of any ancestors.
   **/  
-  scrollOffset: function(element) {
+  scrollOffset: function() {
+    var element = this.element;
     var valueT = 0, valueL = 0;
     do {
       valueT += element.scrollTop  || 0;
@@ -344,7 +358,8 @@ Object.extend(Element.Methods, {
   },
   
   getDimensions: function(element) {
-    return new Element.Layout(element, { offsets: false }).toObject();
+    var d = new Element.Layout(element, { offsets: false }).toObject();
+    return Object.extend(Element.Layout.normalize(d), d);
   },
   
   getHeight: function(element) {
@@ -356,15 +371,17 @@ Object.extend(Element.Methods, {
   },
   
   getOffsets: function(element) {
-    return new Element.Layout(element, { dimensions: false}).toObject();
+    return new Element.Layout(element, { dimensions: false }).toObject().offsets;
   },
     
   viewportOffset: function(element) {
-    return Element.getOffsets(element).viewport;
+    var o = Element.getOffsets(element).viewport;
+    return Element.Layout.normalize(o);
   },
   
   cumulativeOffset: function(element) {
-    return Element.getOffsets(element).document;
+    var o = Element.getOffsets(element).document;
+    return Element.Layout.normalize(o);
   },
   
   /** 
@@ -374,7 +391,8 @@ Object.extend(Element.Methods, {
    *  offsets of any ancestors.
   **/  
   cumulativeScrollOffset: function(element) {
-    return Element.getOffsets(element).scroll;    
+    var o = Element.getOffsets(element).scroll;
+    return Element.Layout.normalize(o);
   },
   
   /** 
@@ -383,7 +401,8 @@ Object.extend(Element.Methods, {
    *  parent.
   **/  
   positionedOffset: function(element) {
-    return Element.getOffsets(element).positioned;
+    var o = Element.getOffsets(element).positioned;
+    return Element.Layout.normalize(o);
   },
   
   /** 
@@ -527,7 +546,7 @@ document.viewport = {
    *  horizontal and vertical directions.
   **/
   getScrollOffsets: function() {
-    return Element.Dimensions.normalize({
+    return Element.Layout.normalize({
       left: window.pageXOffset 
         || document.documentElement.scrollLeft 
         || document.body.scrollLeft,
