@@ -148,8 +148,11 @@ Object.extend(Event, (function() {
   var cache = Event.cache;
 
   function getEventID(element) {
+    // Event ID is stored as the 0th index in a one-item array so that it
+    // won't get copied to a new node when cloneNode is called.
     if (element._prototypeEventID) return element._prototypeEventID[0];
     arguments.callee.id = arguments.callee.id || 1;
+    
     return element._prototypeEventID = [++arguments.callee.id];
   }
   
@@ -168,7 +171,12 @@ Object.extend(Event, (function() {
   }
   
   function createWrapper(element, eventName, handler) {
-    var id = getEventID(element);
+    var id = getEventID(element), _c = getCacheForID(id);
+
+    // Attach the element itself onto its cache entry so we can retrieve it for
+    // cleanup on page unload.
+    if (!_c.element) _c.element = element;
+
     var c = getWrappersForEventName(id, eventName);
     if (c.pluck("handler").include(handler)) return false;
     
@@ -197,23 +205,44 @@ Object.extend(Event, (function() {
     c[eventName] = c[eventName].without(findWrapper(id, eventName, handler));
   }
   
-  function destroyCache() {
-    for (var id in cache)
-      for (var eventName in cache[id])
-        cache[id][eventName] = null;
+  // Loop through all elements and remove all handlers on page unload. IE
+  // needs this in order to prevent memory leaks.
+  function purgeListeners() {
+    var element, entry;
+    for (var i in Event.cache) {
+      entry = Event.cache[i];
+      Event.stopObserving(entry.element);
+      entry.element = null;
+    }
   }
   
+  function onStop() {
+    document.detachEvent('onstop', onStop);
+    purgeListeners();
+  }
   
-  // Internet Explorer needs to remove event handlers on page unload
-  // in order to avoid memory leaks.
+  function onBeforeUnload() {
+    if (document.readyState === "interactive") {
+      document.attachEvent('onstop', onStop);
+      (function() { document.detachEvent('onstop', onStop); }).defer();
+    }
+  }
+  
   if (window.attachEvent) {
-    window.attachEvent("onunload", destroyCache);
+    // Internet Explorer needs to remove event handlers on page unload
+    // in order to avoid memory leaks.
+    window.attachEvent("onunload", purgeListeners);
+
+    // IE also doesn't fire the unload event if the page is navigated away
+    // from before it's done loading. Workaround adapted from
+    // http://blog.moxiecode.com/2008/04/08/unload-event-never-fires-in-ie/.
+    window.attachEvent("onbeforeunload", onBeforeUnload);        
   }
   
   // Safari has a dummy event handler on page unload so that it won't
   // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
   // object when page is returned to via the back button using its bfcache.
-  if (Prototype.Browser.WebKit) {    
+  if (Prototype.Browser.WebKit) {
     window.addEventListener('unload', Prototype.emptyFunction, false);
   }
     
