@@ -347,10 +347,18 @@ Object.extend(Element.Methods, {
     return new Element.Layout(element, { offsets: false }).toObject();
   },
   
+  /** 
+   *  Element#getHeight(@element) -> Number
+   *  Returns the height of the element.
+  **/
   getHeight: function(element) {
     return Element.getDimensions(element).height;
   },
   
+  /** 
+   *  Element#getWidth(@element) -> Number
+   *  Returns the width of the element.
+  **/
   getWidth: function(element) {
     return Element.getDimensions(element).width;
   },
