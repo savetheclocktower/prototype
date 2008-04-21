@@ -197,23 +197,43 @@ Object.extend(Event, (function() {
     c[eventName] = c[eventName].without(findWrapper(id, eventName, handler));
   }
   
-  function destroyCache() {
-    for (var id in cache)
-      for (var eventName in cache[id])
-        cache[id][eventName] = null;
+  // Loop through all elements and remove all handlers on page unload. IE
+  // needs this in order to prevent memory leaks.
+  function purgeListeners() {
+    var all = document.getElementsByTagName('*');    
+    for (var i, node; node = all[i]; i++) {
+      if (node.nodeType !== Node.ELEMENT_NODE) continue;
+      Element.stopObserving(node);
+    }
   }
   
+  function onStop() {
+    document.detachEvent('onstop', onStop);
+    destroyCache();
+  }
   
-  // Internet Explorer needs to remove event handlers on page unload
-  // in order to avoid memory leaks.
+  function onBeforeUnload() {
+    if (document.readyState === "interactive") {
+      document.attachEvent('onstop', onStop);
+      (function() { document.detachEvent('onstop', onStop); }).defer();
+    }
+  }
+  
   if (window.attachEvent) {
-    window.attachEvent("onunload", destroyCache);
+    // Internet Explorer needs to remove event handlers on page unload
+    // in order to avoid memory leaks.
+    window.attachEvent("onunload", purgeListeners);
+
+    // IE also doesn't fire the unload event if the page is navigated away
+    // from before it's done loading. Workaround adapted from
+    // http://blog.moxiecode.com/2008/04/08/unload-event-never-fires-in-ie/.
+    window.attachEvent("onbeforeunload", onBeforeUnload);        
   }
   
   // Safari has a dummy event handler on page unload so that it won't
   // use its bfcache. Safari <= 3.1 has an issue with restoring the "document"
   // object when page is returned to via the back button using its bfcache.
-  if (Prototype.Browser.WebKit) {    
+  if (Prototype.Browser.WebKit) {
     window.addEventListener('unload', Prototype.emptyFunction, false);
   }
     
