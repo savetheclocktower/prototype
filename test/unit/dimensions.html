@@ -86,19 +86,63 @@
       left: 15px;
     }
     
-    #dimensions-display-none, #imensions-display-none-pos-rel, #dimensions-display-none-pos-abs {
+    #dimensions-display-none, #dimensions-display-none-pos-rel, #dimensions-display-none-pos-abs {
         display: none;
     }
     
     #dimensions-table, #dimensions-tbody, #dimensions-tr, #dimensions-td {
-        font-size: 10px;
-        margin: 0;
-        padding: 0;
-        border: 0;
-        border-spacing: 0;
-        height: 10em;
-        width: 20em;
+      font-size: 10px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      border-spacing: 0;
+      height: 10em;
+      width: 20em;
     }
+
+    .getDimensionsBox {
+      float: left;
+      clear: both;
+      width: 200px;
+      height: 200px;
+      background: #1d8bcb;
+    }
+
+    .getDimensionsBox div { float: left; }
+
+    .getDimensionsBox .deep {
+      height: 150px;
+      width: 150px;
+      background: #21bacc;
+    }
+
+    .getDimensionsBox .deeper {
+      height: 130px;
+      width: 130px;
+      background: #94dee6;
+    }
+
+    .getDimensionsBox .deepest {
+      height: 100px;
+      width: 100px;
+      background: #cbeff3;
+    }
+
+    #clonePositionSource,
+    #cloneDimensionsSource {
+      position: absolute;
+      top: 10px;
+      left: 560px;
+      height: 20px;
+      width: 30px;
+      background: red;
+    }
+
+    #clonePositionTarget,
+    #cloneDimensionsTarget {
+      position: absolute;
+      background: #21bacc;
+     }
 
     #notInlineAbsoluted { position: absolute; }
     
@@ -410,6 +454,44 @@
 
 <div id='elementToViewportDimensions' style='display: none'></div>
 
+<div class='getDimensionsBox' id='getDimensionsBox1'>
+  <div class='deep'>
+    <div class='deeper'>
+      <div class='deepest' style='display:none'></div>
+    </div>
+  </div>
+</div>
+
+<div class='getDimensionsBox' id='getDimensionsBox2'>
+  <div class='deep'>
+    <div class='deeper' style='display:none'>
+      <div class='deepest'></div>
+    </div>
+  </div>
+</div>
+
+<div class='getDimensionsBox' id='getDimensionsBox3'>
+  <div class='deep' style='display:none'>
+    <div class='deeper' style='display:none'>
+      <div class='deepest'></div>
+    </div>
+  </div>
+</div>
+
+<div class='getDimensionsBox' id='getDimensionsBox4' style='display:none'>
+  <div class='deep' style='display:none'>
+    <div class='deeper' style='display:none'>
+      <div class='deepest'></div>
+    </div>
+  </div>
+</div>
+
+<div id='clonePositionSource'></div>
+<div id='clonePositionTarget'></div>
+
+<div id='cloneDimensionsSource'></div>
+<div id='cloneDimensionsTarget'></div>
+
 <!-- Tests follow -->
 <script type="text/javascript" language="javascript" charset="utf-8">
 // <![CDATA[
@@ -551,6 +633,23 @@
       $('dimensions-table').hide();
       this.assertIdentical(100, $('dimensions-table').getDimensions().height);
       this.assertIdentical(200, $('dimensions-table').getDimensions().width);
+      
+      Prototype.debug = true;
+
+	    // display:none ancestors
+      $R(1, 4).each(function(num) {
+        var element = $('getDimensionsBox' + num);
+        this.assertIdentical(200, element.getDimensions().height);
+        this.assertIdentical(200, element.getDimensions().width);
+        this.assertIdentical(150, element.down('.deep').getDimensions().height);
+        this.assertIdentical(150, element.down('.deep').getDimensions().width);
+        this.assertIdentical(130, element.down('.deeper').getDimensions().height);
+        this.assertIdentical(130, element.down('.deeper').getDimensions().width);
+        this.assertIdentical(100, element.down('.deepest').getDimensions().height);
+        this.assertIdentical(100, element.down('.deepest').getDimensions().width);
+      }, this);
+      
+      Prototype.debug = false;      
     },
 
     testPositionedOffset: function() {

@@ -18,6 +18,24 @@ Element.Layout = Class.create({
     this.getLayout();
   },
   
+  _applyTemporaryStyles: function(element, styles) {
+    for (var property in styles) {
+      element['_original_' + property] = element.style[property];
+    }    
+    element.setStyle(styles);
+  },
+  
+  _removeTemporaryStyles: function(element) {
+    var prop, styles = {};
+    for (var property in element) {
+      if (!property.startsWith('_original_')) continue;
+      prop = property.replace(/^_original_/, '');
+      styles[prop] = element[property] || '';
+      element[property] = undefined;
+    }    
+    element.setStyle(styles);
+  },
+  
   getLayout: function() {
     var element = this.element, 
         display = element.getStyle('display'),
@@ -25,24 +43,32 @@ Element.Layout = Class.create({
     
     // The style object is inaccessible in Safari <= 2.0 when the element
     // is hidden.
-    var isNotShown = display === "none" || display === null;
+    var isNotShown = display === "none" || display === null || element.offsetHeight == 0;
     var isTable = element.tagName.toUpperCase() == 'TABLE';
+    var hasHiddenAncestor = false;
     
     // If the element is hidden, we show it for an instant
-    // to grab its dimensions.
+    // to grab its dimensions.    
     if (isNotShown) {
-      var style = element.style;
-      var originalStyle = {
-        visibility: style.visibility,
-        position:   style.position,
-        display:    style.display
-      };
-      
-      Object.extend(style, {
+      this._applyTemporaryStyles(element, {
         visibility: 'hidden',
         position:   'absolute',
         display:    'block'
       });
+
+      // If, after showing the element, it still has an offsetHeight of 0,
+      // we assume one of its ancestors is hidden.
+      hasHiddenAncestor = element.offsetHeight == 0;
+
+      if (hasHiddenAncestor) {
+        var ancestors = element.ancestors();
+        ancestors.each( function(ancestor) {
+          if (ancestor !== element && ancestor.visible()) return;
+          this._applyTemporaryStyles(ancestor, {
+            display: 'block', visibility: 'visible', position: 'absolute'
+          });
+        }, this);
+      }      
     }
     
     if (this.options.dimensions === true) {
@@ -69,7 +95,7 @@ Element.Layout = Class.create({
       
       this.layout.paddingBox = paddingBox;
 
-      var padding = this.getStyleValuesFor('padding', 'trbl');
+      var padding = this._getStyleValuesFor('padding', 'trbl');
       this.layout.padding = padding;
 
       var contentBox = {
@@ -79,7 +105,7 @@ Element.Layout = Class.create({
       
       this.layout.contentBox = contentBox;
 
-      var border = this.getStyleValuesFor('border', 'trbl');
+      var border = this._getStyleValuesFor('border', 'trbl');
       this.layout.border = border;
 
       var borderBox = {
@@ -106,7 +132,10 @@ Element.Layout = Class.create({
     // If we altered the element's styles, return them to their
     // original values.
     if (isNotShown) {
-      Object.extend(style, originalStyle);
+      this._removeTemporaryStyles(element);
+      if (hasHiddenAncestor) {
+        ancestors.each(this._removeTemporaryStyles, this);
+      }
     }
     
     return this.layout;
@@ -122,7 +151,7 @@ Element.Layout = Class.create({
   // sidesNeeded argument is a string.
   // "trbl" = top, right, bottom, left
   // "tb"   = top, bottom
-  getStyleValuesFor: function(property, sidesNeeded) {
+  _getStyleValuesFor: function(property, sidesNeeded) {
     var sides = $w('top bottom left right');
     var propertyNames = sides.map( function(s) {
       return property + s.capitalize();
@@ -244,7 +273,7 @@ Element.Layout = Class.create({
     // Then subtract cumulative scroll offsets
     element = this.element;
     do {
-      if (!Prototype.Browser.Opera || element.tagName.toUpperCase() == 'BODY') {
+      if (!Prototype.Browser.Opera || element.tagName.toUpperCase() == 'HTML') {
         valueT -= element.scrollTop  || 0;
         valueL -= element.scrollLeft || 0;
       }
@@ -279,7 +308,8 @@ Element.Layout = Class.create({
     if (element.offsetParent) return $(element.offsetParent);
     if (element == document.body) return $(element);
     
-    while ((element = element.parentNode) && element !== document.body)
+    while ((element = element.parentNode) && element !== document.body
+     && element.nodeType !== 9)
       if (Element.getStyle(element, 'position') !== 'static')
         return element;
 
