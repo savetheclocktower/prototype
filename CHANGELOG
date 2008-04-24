@@ -1,3 +1,5 @@
+* Amended failing Element#identify test.
+
 * Fix error when calling Event.stopObserving(window). (jddalton) [#30 state:resolved]
 
 * Fix an issue with calling Event.pointer before the DOM is loaded. (kangax, jddalton) [#4 state:resolved]
