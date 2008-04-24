@@ -120,6 +120,8 @@ new Test.Unit.Runner({
     this.assertEqual(0, count);
     span.fire("test:somethingElseHappened");
     this.assertEqual(0, count);
+
+    this.assertEqual(window, Event.stopObserving(window));
   },
   
   testStopObservingWithoutHandlerArgument: function() {
