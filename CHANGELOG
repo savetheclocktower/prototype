@@ -1,3 +1,15 @@
+* Amended failing Element#identify test.
+
+* Fix error when calling Event.stopObserving(window). (jddalton) [#30 state:resolved]
+
+* Fix an issue with calling Event.pointer before the DOM is loaded. (kangax, jddalton) [#4 state:resolved]
+
+* Refactor unit tests. Unit tests are now dynamically generated from a JavaScript test file and optional HTML, JS and CSS fixtures. [Tobie Langel]
+
+* Switch to a different strategy for event handler garbage collection. Store references to elements instead of searching the entire document. (jddalton, kangax, Andrew Dupont)
+
+* Add event cleanup on Element#update and Element#replace so that replaced content does not leak memory. (jddalton, Andrew Dupont)
+
 * Loop through all elements and remove all handlers on page unload. IE needs this in order to prevent memory leaks. (kangax, jddalton, Andrew Dupont)
 
 * Fix issue where IE fails to GC when the page is navigated away from before it's done loading. (jddalton, Andrew Dupont)
