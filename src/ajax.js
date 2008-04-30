@@ -1,8 +1,8 @@
-/** section: ajax
+
+
+/** section: Ajax
+ * Ajax 
 **/
-
-
-/** Ajax **/
 var Ajax = {
   /**
    *  Ajax.getTransport() -> XMLHttpRequest
@@ -20,7 +20,9 @@ var Ajax = {
   activeRequestCount: 0
 };
 
-/** Ajax.Responders **/
+/** section: Ajax
+ * Ajax.Responders
+**/
 Ajax.Responders = {
   /**
    *  Ajax.Responders.responders = Array
@@ -79,7 +81,7 @@ Ajax.Responders.register({
   onComplete: function() { Ajax.activeRequestCount-- }
 });
 
-/**
+/** section: Ajax
  *  class Ajax.Base
 **/
 Ajax.Base = Class.create({
@@ -104,7 +106,7 @@ Ajax.Base = Class.create({
   }
 });
 
-/**
+/** section: Ajax
  *  class Ajax.Request < Ajax.Base
 **/
 Ajax.Request = Class.create(Ajax.Base, {
@@ -296,7 +298,7 @@ Ajax.Request.Events =
   ['Uninitialized', 'Loading', 'Loaded', 'Interactive', 'Complete'];
   
   
-/**
+/** section: Ajax
  *  class Ajax.Response
 **/
 Ajax.Response = Class.create({
@@ -373,7 +375,7 @@ Ajax.Response = Class.create({
   }
 });
 
-/**
+/** section: Ajax
  *  class Ajax.Updater < Ajax.Request
 **/
 Ajax.Updater = Class.create(Ajax.Request, {
@@ -422,7 +424,7 @@ Ajax.Updater = Class.create(Ajax.Request, {
   }
 });
 
-/**
+/** section: Ajax
  *  class Ajax.PeriodicalUpdater < Ajax.Base
 **/
 Ajax.PeriodicalUpdater = Class.create(Ajax.Base, {

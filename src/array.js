@@ -1,4 +1,4 @@
-/** alias: Array.from
+/** alias: Array.from, section: Language
  *  $A(iterable) -> Array
  *  - iterable (Object): An array-like collection (anything with numeric
  *      indices).
@@ -29,7 +29,7 @@ if (Prototype.Browser.WebKit) {
 
 Array.from = $A;
 
-/**
+/** section: Language
  *  class Array
  *  includes Enumerable
 **/
@@ -109,7 +109,7 @@ Object.extend(Array.prototype, {
   },
 
   /**
-   *  Array#reverse(inline = false) -> Array
+   *  Array#reverse([inline = false]) -> Array
    *  - inline (Boolean): Whether to modify the array in place. If `false`,
    *      clones the original array first.
    *  
@@ -129,7 +129,7 @@ Object.extend(Array.prototype, {
   },
   
   /**
-   *  Array#uniq(sorted = false)
+   *  Array#uniq([sorted = false]) -> Array
    *  - sorted (Boolean): Whether the array has already been sorted. If `true`,
    *      a less-costly algorithm will be used.
    *  
@@ -239,7 +239,7 @@ if (!Array.prototype.lastIndexOf) Array.prototype.lastIndexOf = function(item, i
 
 Array.prototype.toArray = Array.prototype.clone;
 
-/**
+/** section: Language
  *  $w(string) -> Array
  *  - string (String): A string with zero or more spaces.
  *  

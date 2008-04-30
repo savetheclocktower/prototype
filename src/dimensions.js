@@ -1,4 +1,4 @@
-/**
+/** section: DOM
  *  class Element.Layout
 **/
 Element.Layout = Class.create({
@@ -545,9 +545,8 @@ Object.extend(Element.Methods, {
   }
 });
 
-
 document.viewport = {
-  /** 
+  /* (un-PDoc-ing until bug #2 is fixed)
    *  document.viewport.getDimensions () -> Object
    *  Returns the height and width of the browser viewport.
   **/  
@@ -562,7 +561,7 @@ document.viewport = {
     return dimensions;
   },
   
-  /** 
+  /* (un-PDoc-ing until bug #2 is fixed) 
    *  document.viewport.getWidth() -> Number
    *  Returns the width of the browser viewport.
   **/
@@ -570,7 +569,7 @@ document.viewport = {
     return this.getDimensions().width;
   },
 
-  /** 
+  /* (un-PDoc-ing until bug #2 is fixed) 
    *  document.viewport.getHeight() -> Number
    *  Returns the height of the browser viewport.
   **/
@@ -578,7 +577,7 @@ document.viewport = {
     return this.getDimensions().height;
   },
 
-  /** 
+  /* (un-PDoc-ing until bug #2 is fixed) 
    *  document.viewport.getScrollOffsets() -> Object
    *  Returns the distances the viewport has been scrolled in the
    *  horizontal and vertical directions.

@@ -1,3 +1,7 @@
+/** section: lang
+ * mixin Enumerable
+**/
+
 var $break = { };
 
 var Enumerable = {

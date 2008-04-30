@@ -31,6 +31,20 @@ var Prototype = {
 if (Prototype.Browser.MobileSafari)
   Prototype.BrowserFeatures.SpecificElementExtensions = false;
   
+/**
+ *  == Language ==
+ *  Extensions to the JavaScript language.
+**/
+
+/**
+ *  == Ajax ==
+ *  Prototype's wrapper around the `XmlHttpRequest` API.
+**/
+
+/**
+ *  == DOM ==
+ *  Prototype's extensions to the DOM API.
+**/  
 
 <%= include 'base.js', 'string.js' %>
 

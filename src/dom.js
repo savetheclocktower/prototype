@@ -1,4 +1,4 @@
-/**
+/** section: DOM
  *  $(element) -> Element
  *  $(element...) -> [Element...]
  *  - element (Element | String): A reference to an existing DOM node _or_ a
@@ -34,7 +34,10 @@ if (Prototype.BrowserFeatures.XPath) {
 
 /*--------------------------------------------------------------------------*/
 
-/** Node **/
+/* TODO: Find out why PDoc doesn't like this one
+ *  
+**/
+
 if (!window.Node) var Node = { };
 
 if (!Node.ELEMENT_NODE) {
@@ -55,9 +58,7 @@ if (!Node.ELEMENT_NODE) {
   });
 }
 
-/** Element **/
-
-/**
+/** section: DOM
  *  class Element
 **/
 (function() {

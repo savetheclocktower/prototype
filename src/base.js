@@ -1,7 +1,7 @@
 /* Based on Alex Arnell's inheritance implementation. */
 
-/**
- *  Class
+/** section: Language
+ * Class
 **/
 var Class = {
   /**
@@ -107,8 +107,8 @@ Class.Methods = {
 
 var Abstract = { };
 
-/**
- *  Object
+/** section: Language
+ * Object
 **/
 
 /**
@@ -351,6 +351,9 @@ Object.extend(Object, {
   }
 });
 
+/** section: Language
+ * Function
+**/
 
 Object.extend(Function.prototype, {
   /**
@@ -480,6 +483,10 @@ Object.extend(Function.prototype, {
 Function.prototype.defer = Function.prototype.delay.curry(0.01);
 
 
+/** section: Language
+ * Date 
+**/
+
 /**
  *  Date#toJSON() -> String
  *  Converts the date into a JSON string (following the ISO format used by
@@ -493,6 +500,10 @@ Date.prototype.toJSON = function() {
     this.getUTCMinutes().toPaddedString(2) + ':' +
     this.getUTCSeconds().toPaddedString(2) + 'Z"';
 };
+
+/** section: Language
+ * Try
+**/
 
 /**
  *  Try.these(function...) -> ?
@@ -518,6 +529,10 @@ var Try = {
 
 RegExp.prototype.match = RegExp.prototype.test;
 
+/** section: Language
+ * RegExp
+**/
+
 
 /**
  *  RegExp.escape(str) -> String
@@ -534,7 +549,7 @@ RegExp.escape = function(str) {
 
 /*--------------------------------------------------------------------------*/
 
-/**
+/** section: Language
  *  class PeriodicalExecuter
 **/
 var PeriodicalExecuter = Class.create({
