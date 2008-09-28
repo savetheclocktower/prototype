@@ -195,8 +195,7 @@ new Test.Unit.Runner({
   },
   
   testNewElementInsert: function() {
-    var container = new Element('div');
-    element = new Element('div');
+    var container = new Element('div'), element = new Element('div');
     container.insert(element);
     
     element.insert({ before: '<p>a paragraph</p>' });
@@ -385,11 +384,11 @@ new Test.Unit.Runner({
     
     $('testoption-replace').replace('<option>hello</option>');
     this.assert($('testoption-replace-container').innerHTML.include('hello'));
-         
-    $('testinput-replace').replace('<p>hello world</p>');
+    
+    Element.replace('testinput-replace', '<p>hello world</p>');
     this.assertEqual('<p>hello world</p>', getInnerHTML('testform-replace'));
 
-    $('testform-replace').replace('<form></form>');
+    Element.replace('testform-replace', '<form></form>');
     this.assertEqual('<p>some text</p><form></form><p>some text</p>', getInnerHTML('testform-replace-container'));
   },
   
@@ -561,6 +560,10 @@ new Test.Unit.Runner({
     var dummy = $(document.createElement('DIV'));
     dummy.innerHTML = '<div></div>'.times(3);
     this.assert(typeof dummy.down().setStyle == 'function');
+    
+    var input = $$('input')[0];
+    this.assertNothingRaised(function(){ input.down('span') });
+    this.assertUndefined(input.down('span'));
   },
   
   testElementPrevious: function() {
@@ -711,6 +714,10 @@ new Test.Unit.Runner({
     
     $(document.body).insert(new Element('div', { id: 'impostor' }));
     this.assert(!$('impostor').descendantOf('ancestor'));
+    
+    // test descendantOf document
+    this.assert($(document.body).descendantOf(document));  
+    this.assert($(document.documentElement).descendantOf(document));  
   },  
   
   testChildOf: function() {
@@ -883,6 +890,10 @@ new Test.Unit.Runner({
       this.assertEqual("14px", $('style_test_dimensions').getStyle('width'));
       this.assertEqual("17px", $('style_test_dimensions').getStyle('height'));
     }
+    
+    // height/width could always be calculated if it's set to "auto" (Firefox)
+    this.assertNotNull($('auto_dimensions').getStyle('height'));
+    this.assertNotNull($('auto_dimensions').getStyle('width'));
   },
   
   testElementGetOpacity: function() {
@@ -988,6 +999,18 @@ new Test.Unit.Runner({
     this.assertEqual('martin',    p.readAttribute('name'));
     this.assertEqual('stockholm', p.readAttribute('location'));
     this.assertEqual('26',        p.readAttribute('age'));
+  },
+  
+  testElementHasAttribute: function() {
+    var label = $('write_attribute_label');
+    this.assertIdentical(true,  label.hasAttribute('for'));
+    this.assertIdentical(false, label.hasAttribute('htmlFor'));
+    this.assertIdentical(false, label.hasAttribute('className'));
+    this.assertIdentical(false, label.hasAttribute('rainbows'));
+    
+    var input = $('write_attribute_input');
+    this.assertNotIdentical(null, input.hasAttribute('readonly'));
+    this.assertNotIdentical(null, input.hasAttribute('readOnly'));
   },
   
   testNewElement: function() {

@@ -61,21 +61,21 @@ Event.Methods = (function() {
     element: function(event) {
       event = Event.extend(event);
       
-      var node = event.target, type = event.type;
+      var node          = event.target,
+          type          = event.type,
+          currentTarget = event.currentTarget;
       
-      if (event.currentTarget) {
+      if (currentTarget && currentTarget.tagName) {
         // Firefox screws up the "click" event when moving between radio buttons
         // via arrow keys. It also screws up the "load" and "error" events on images,
         // reporting the document as the target instead of the original image.
-        var currentTarget = event.currentTarget;
-        var tagName = currentTarget.tagName.toUpperCase();
-        if (['load', 'error'].include(type) ||
-         (tagName === 'INPUT' && currentTarget.type === 'radio' && type === 'click'))
-          node = currentTarget;
+        if (type === 'load' || type === 'error' ||
+          (type === 'click' && currentTarget.tagName.toLowerCase() === 'input'
+            && currentTarget.type === 'radio'))
+              node = currentTarget;
       }
-      
-      return Element.extend(node && node.nodeType == Node.TEXT_NODE ?
-       node.parentNode : node);
+      if (node.nodeType == Node.TEXT_NODE) node = node.parentNode;
+      return Element.extend(node);
     },
 
     findElement: function(event, expression) {
@@ -139,7 +139,7 @@ Event.extend = (function() {
     };
     
   } else {
-    Event.prototype = Event.prototype || document.createEvent("HTMLEvents").__proto__;
+    Event.prototype = Event.prototype || document.createEvent("HTMLEvents")['__proto__'];
     Object.extend(Event.prototype, methods);
     return Prototype.K;
   }

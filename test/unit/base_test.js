@@ -3,6 +3,8 @@ new Test.Unit.Runner({
     this.assertEnumEqual([], (function() {}).argumentNames());
     this.assertEnumEqual(["one"], (function(one) {}).argumentNames());
     this.assertEnumEqual(["one", "two", "three"], (function(one, two, three) {}).argumentNames());
+    this.assertEnumEqual(["one", "two", "three"], (function(  one  , two 
+       , three   ) {}).argumentNames());
     this.assertEqual("$super", (function($super) {}).argumentNames().first());
     
     function named1() {};
@@ -191,6 +193,13 @@ new Test.Unit.Runner({
     this.assert(Object.isHash($H()));
     this.assert(Object.isHash(new Hash()));
     this.assert(!Object.isHash({}));
+    this.assert(!Object.isHash(null));
+    this.assert(!Object.isHash());
+    this.assert(!Object.isHash(''));
+    this.assert(!Object.isHash(2));
+    this.assert(!Object.isHash(false));
+    this.assert(!Object.isHash(true));
+    this.assert(!Object.isHash([]));
   },
   
   testObjectIsElement: function() {
@@ -198,6 +207,13 @@ new Test.Unit.Runner({
     this.assert(Object.isElement(new Element('div')));
     this.assert(Object.isElement($('testlog')));
     this.assert(!Object.isElement(document.createTextNode('bla')));
+
+    // falsy variables should not mess up return value type
+    this.assertIdentical(false, Object.isElement(0));
+    this.assertIdentical(false, Object.isElement(''));
+    this.assertIdentical(false, Object.isElement(NaN));
+    this.assertIdentical(false, Object.isElement(null));
+    this.assertIdentical(false, Object.isElement(undefined));
   },
   
   testObjectIsFunction: function() {
@@ -488,6 +504,17 @@ new Test.Unit.Runner({
       toString: function() { return "toString" },
       valueOf: function() { return "valueOf" }
     });
+    
+    var Parent = Class.create({
+      m1: function(){ return 'm1' },
+      m2: function(){ return 'm2' }
+    });
+    var Child = Class.create(Parent, {
+      m1: function($super) { return 'm1 child' },
+      m2: function($super) { return 'm2 child' }
+    });
+    
+    this.assert(new Child().m1.toString().indexOf('m1 child') > -1);
     
     this.assertEqual("toString", new Foo().toString());
     this.assertEqual("valueOf", new Foo().valueOf());

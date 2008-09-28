@@ -121,7 +121,8 @@ Element.Methods = {
    *  the element itself.
   **/
   hide: function(element) {
-    $(element).style.display = 'none';
+    element = $(element);
+    element.style.display = 'none';
     return element;
   },
   
@@ -134,7 +135,8 @@ Element.Methods = {
    *  Returns the element itself.
   **/
   show: function(element) {
-    $(element).style.display = '';
+    element = $(element);
+    element.style.display = '';
     return element;
   },
   
@@ -503,7 +505,7 @@ Element.Methods = {
     element = $(element);
     if (arguments.length == 1) return element.firstDescendant();
     return Object.isNumber(expression) ? element.descendants()[expression] :
-      element.select(expression)[index || 0];
+      Element.select(element, expression)[index || 0];
   },
   
   /**
@@ -803,7 +805,7 @@ Element.Methods = {
     element = $(element);
     style = style == 'float' ? 'cssFloat' : style.camelize();
     var value = element.style[style];
-    if (!value) {
+    if (!value || value == 'auto') {
       var css = document.defaultView.getComputedStyle(element, null);
       value = css ? css[style] : null;
     }
@@ -864,7 +866,7 @@ Element.Methods = {
       element.style.position = 'relative';
       // Opera returns the offset relative to the positioning context, when an
       // element is position relative but top and left have not been defined
-      if (window.opera) {
+      if (Prototype.Browser.Opera) {
         element.style.top = 0;
         element.style.left = 0;
       }  
@@ -1321,7 +1323,7 @@ Element.Methods.Simulated = {
   hasAttribute: function(element, attribute) {
     attribute = Element._attributeTranslations.has[attribute] || attribute;
     var node = $(element).getAttributeNode(attribute);
-    return node && node.specified;
+    return !!(node && node.specified);
   }
 };
 
@@ -1330,9 +1332,9 @@ Element.Methods.ByTag = { };
 Object.extend(Element, Element.Methods);
 
 if (!Prototype.BrowserFeatures.ElementExtensions && 
-    document.createElement('div').__proto__) {
+    document.createElement('div')['__proto__']) {
   window.HTMLElement = { };
-  window.HTMLElement.prototype = document.createElement('div').__proto__;
+  window.HTMLElement.prototype = document.createElement('div')['__proto__'];
   Prototype.BrowserFeatures.ElementExtensions = true;
 }
 
@@ -1473,7 +1475,7 @@ Element.addMethods = function(methods) {
     if (window[klass]) return window[klass];
     
     window[klass] = { };
-    window[klass].prototype = document.createElement(tagName).__proto__;
+    window[klass].prototype = document.createElement(tagName)['__proto__'];
     return window[klass];
   }
   

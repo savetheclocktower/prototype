@@ -1,18 +1,50 @@
-* Amended failing Element#identify test.
+* Improve NodeList detection for Safari's $A function. [Garrett Smith, jddalton]
 
-* Fix error when calling Event.stopObserving(window). (jddalton) [#30 state:resolved]
+* Use different tactic to sniff for Opera in order to avoid false positives in IE. [Tobie Langel, jddalton]
+
+* Rename variable in Form.Element.Serializers.select. (jddalton)
+
+* Coerce Opera's version string into a number whenever we need to sniff. (Sam Holman, jddalton)
+
+* Ensure Object.isElement handles "falsy" values properly. (kangax)
+
+* Fix exiting test task on INT signal. (Samuel Lebeau)
+
+* Fix unit test freeze in IE. (Tobie Langel)
+
+* Ensure Hash does not return keys from the prototype chain (e.g., constructor, valueOf, toString). (kangax)
+
+* Fix toString/valueOf sharing same method reference via closure in Class#addMethods. Use plain property assignment, since Object.extend fails to enumerate over toString/valueOf. (kangax)
+
+* Stop Form.Element.disable from stealing focus. (jddalton)
+
+* Ensure Element.hide and Element.show return an element, even if you pass an element ID. (Andrew Dupont)
+
+* Fix an issue where Element#getStyle('height') returns null if the height is set to "auto." (kangax, jddalton)
+
+* Add unit tests for Element#descendantOf. (jddalton)
+
+* Form#serializeElements should not serialize file inputs. (kangax, Lonesome Boy)
 
 * Fix an issue with calling Event.pointer before the DOM is loaded. (kangax, jddalton) [#4 state:resolved]
 
+* Element#down on an input element should not raise error. (humeniuc, kangax)
+
+* More unit tests for Object.isHash. (Tobie Langel)
+
+* Allow Function#argumentNames to handle line breaks between arguments. (Geoff M. Granum, Tobie Langel) [#63 state:resolved]
+
+* For consistency, add additional optional parameter "context" to Number.prototype.times. (Samuel Lebeau)
+
+* Replace all instances of foo.__proto__ by foo['__proto__'] for Caja-compliance. (Tobie Langel)
+
+* Speed up Function#argumentNames. Avoid Enum dependency. (Samuel Lebeau, Tobie Langel)
+
+* Fix Event#element accessing inexistent tagName property (e.g. when element is a document). (kangax)
+
+* Amended failing Element#identify test.
+
 * Refactor unit tests. Unit tests are now dynamically generated from a JavaScript test file and optional HTML, JS and CSS fixtures. [Tobie Langel]
-
-* Switch to a different strategy for event handler garbage collection. Store references to elements instead of searching the entire document. (jddalton, kangax, Andrew Dupont)
-
-* Add event cleanup on Element#update and Element#replace so that replaced content does not leak memory. (jddalton, Andrew Dupont)
-
-* Loop through all elements and remove all handlers on page unload. IE needs this in order to prevent memory leaks. (kangax, jddalton, Andrew Dupont)
-
-* Fix issue where IE fails to GC when the page is navigated away from before it's done loading. (jddalton, Andrew Dupont)
 
 * Fix issue where Safari improperly reports an element as a descendant of itself.
 

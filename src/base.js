@@ -91,12 +91,13 @@ Class.Methods = {
       var property = properties[i], value = source[property];
       if (ancestor && Object.isFunction(value) &&
           value.argumentNames().first() == "$super") {
-        var method = value, value = Object.extend((function(m) { 
+        var method = value;
+        value = (function(m) {
           return function() { return ancestor[m].apply(this, arguments) };
-        })(property).wrap(method), {
-          valueOf:  function() { return method },
-          toString: function() { return method.toString() }  
-        });
+        })(property).wrap(method);
+
+        value.valueOf = method.valueOf.bind(method);
+        value.toString = method.toString.bind(method);
       }
       this.prototype[property] = value;
     }
@@ -285,7 +286,7 @@ Object.extend(Object, {
    *  Returns `true` if `object` is a DOM node of type 1; `false` otherwise.
   **/  
   isElement: function(object) {
-    return object && object.nodeType == 1;
+    return !!(object && object.nodeType == 1);
   },
   
   /**
@@ -363,7 +364,8 @@ Object.extend(Function.prototype, {
    *  defined without parameters).
   **/
   argumentNames: function() {
-    var names = this.toString().match(/^[\s\(]*function[^(]*\((.*?)\)/)[1].split(",").invoke("strip");
+    var names = this.toString().match(/^[\s\(]*function[^(]*\(([^\)]*)\)/)[1]
+      .replace(/\s+/g, '').split(',');
     return names.length == 1 && !names[0] ? [] : names;
   },
   
