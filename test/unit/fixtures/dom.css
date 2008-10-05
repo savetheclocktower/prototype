@@ -16,18 +16,6 @@ div.style-test { margin-left: 1px }
 #floating_style { float: left }
 #op2 { opacity:0.5;filter:alpha(opacity=50)progid:DXImageTransform.Microsoft.Blur(strength=10);}
 
-#scroll_test_1 { 
-  margin: 10px;
-  padding: 10px;
-  position: relative;
-}
-
-#scroll_test_2 {
-  position: absolute;
-  left: 10px;
-  top: 10px;
-}
-
 #dimensions-visible,
 #dimensions-display-none,
 #dimensions-visible-pos-rel,

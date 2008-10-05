@@ -15,6 +15,7 @@ Element.Layout = Class.create({
     }, options || {});
     
     this.layout = {};
+    
     this.getLayout();
   },
   
@@ -84,6 +85,9 @@ Element.Layout = Class.create({
         element.style.marginRight = originalRight;
       }
 
+      // We can't assume the user will want _all_ position values at once;
+      // it'd be too costly. Instead, we load the values on demand.
+
       var paddingBox = {
         width:  noOffsetWidth || element.clientWidth,
         height: element.clientHeight
@@ -152,23 +156,14 @@ Element.Layout = Class.create({
   // "trbl" = top, right, bottom, left
   // "tb"   = top, bottom
   _getStyleValuesFor: function(property, sidesNeeded) {
-    var sides = $w('top bottom left right');
-    var propertyNames = sides.map( function(s) {
-      return property + s.capitalize();
-    });
-    
-    if (property === 'border') {
-      propertyNames = propertyNames.map( function(p) {
-        return p + 'Width';
-      });
-    }
-    
+    var sides = $w('top bottom left right'), propertyName;
     var values = {};
-    
-    sides.each( function(side, index) {
-      if (!sidesNeeded.include(side.charAt(0))) return;
-      values[side] = this.cssToNumber(propertyNames[index]);
-    }, this);
+    for (var i = 0, side; side = sides[i]; i++) {
+      if (!sidesNeeded.include(side.charAt(0))) continue;      
+      propertyName = property + side.capitalize();      
+      if (property === 'border') propertyName += 'Width';      
+      values[side] = this.cssToNumber(propertyName);
+    }
     
     return values;    
   },
@@ -331,8 +326,28 @@ Element.Layout = Class.create({
       element = element.parentNode;
     } while (element);
     return Element.Layout.normalize({ left: valueL, top: valueT });
-  }  
+  },
   
+  /**
+   *  Element.Layout#relativeTo(element) -> Object
+   *  Reports the element's top- and left-distance from the upper-left
+   *  corner of the given element.
+   *
+  **/
+  relativeTo: function(element) {
+    element = $(element);
+    var viewportOffset = this.viewportOffset();
+    if (element === document.viewport) {
+      return viewportOffset;
+    } else {
+      var otherLayout = element.getLayout();      
+      var otherViewportOffset = otherLayout.viewportOffset();      
+      return Element.Layout.normalize({
+        left: viewportOffset.left - otherViewportOffset.left,
+        top:  viewportOffset.top  - otherViewportOffset.top
+      });      
+    }
+  }  
 });
 
 if (Prototype.Browser.IE) {
@@ -384,7 +399,7 @@ Object.extend(Element.Methods, {
    *  when speed is of the utmost importance.
   **/  
   getLayout: function(element, options) {
-    return new Element.Layout(element, options).toObject();
+    return new Element.Layout(element, options);
   },
   
   getDimensions: function(element) {
